@@ -13,6 +13,9 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+    - name: Log in to Docker Hub
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
@@ -31,8 +34,12 @@ jobs:
 
     - name: Build Docker images
       run: |
-        docker build -t go-oda-tmf632 -f Dockerfile .
-        docker build -t go-oda-tmf669 -f Dockerfile .
+        docker build -t go-oda-tmf632:$GITHUB_SHA -f Dockerfile .
+        docker tag go-oda-tmf632:$GITHUB_SHA jom6768/go-oda-tmf632:latest
+        docker push jom6768/go-oda-tmf632:latest
+        docker build -t go-oda-tmf669:$GITHUB_SHA -f Dockerfile .
+        docker tag go-oda-tmf669:$GITHUB_SHA jom6768/go-oda-tmf669:latest
+        docker push jom6768/go-oda-tmf669:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -42,4 +49,6 @@ jobs:
       uses: azure/setup-kubectl@v1
     - name: Deploy to Minikube
       run: |
-        kubectl apply -f k8s/
+        kubectl apply -f k8s/postgresql-deployment.yaml
+        kubectl apply -f k8s/tmf632-deployment.yaml
+        kubectl apply -f k8s/tmf669-deployment.yaml
