@@ -8,6 +8,7 @@ COPY ./oda/tmf632 ./oda/tmf632
 COPY ./go.mod ./go.sum ./
 
 # Install Go dependencies
+RUN go mod download
 RUN go mod tidy
 
 # Build the Go binary for tmf632
@@ -23,6 +24,7 @@ COPY ./oda/tmf669 ./oda/tmf669
 COPY ./go.mod ./go.sum ./
 
 # Install Go dependencies
+RUN go mod download
 RUN go mod tidy
 
 # Build the Go binary for tmf669
