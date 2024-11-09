@@ -1,0 +1,39 @@
+# TMF669 Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tmf669
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tmf669
+  template:
+    metadata:
+      labels:
+        app: tmf669
+    spec:
+      containers:
+      - name: tmf669
+        image: go-oda-tmf669:latest
+        ports:
+        - containerPort: 8082
+        env:
+        - name: DATABASE_URL
+          value: "postgres://user:password@postgres:5432/go_oda?sslmode=disable"
+
+---
+
+# TMF669 Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: tmf669
+spec:
+  selector:
+    app: tmf669  # Match the selector with the app labels in your pods
+  ports:
+    - protocol: TCP
+      port: 8082  # Internal port within the cluster
+      targetPort: 8082  # The port your container is listening on
+  type: ClusterIP  # Default type, internal access only

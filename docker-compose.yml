@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: go_oda
+    ports:
+      - "5432:5432"
+
+  tmf632:
+    build: .
+    command: go run oda/tmf632/main.go
+    depends_on:
+      - db
+  tmf669:
+    build: .
+    command: go run oda/tmf669/main.go
+    depends_on:
+      - db
