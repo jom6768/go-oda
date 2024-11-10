@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:15
+    image: postgres:latest
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
@@ -10,11 +10,13 @@ services:
 
   tmf632:
     build: .
+    env_file: .env
     command: go run ./oda/tmf632/main.go
     depends_on:
       - db
   tmf669:
     build: .
+    env_file: .env
     command: go run ./oda/tmf669/main.go
     depends_on:
       - db

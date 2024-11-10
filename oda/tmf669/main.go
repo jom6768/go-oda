@@ -25,6 +25,6 @@ func main() {
 	router.HandleFunc("/tmf669/products/{id}", handlers.DeleteProduct(db)).Methods("DELETE")
 
 	// Start server
-	fmt.Println("TMF669 Service running on port 8081")
-	log.Fatal(http.ListenAndServe(":8081", router))
+	fmt.Println("TMF669 Service running on port 8082")
+	log.Fatal(http.ListenAndServe(":8082", router))
 }
