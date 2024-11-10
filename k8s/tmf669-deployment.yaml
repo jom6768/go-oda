@@ -16,6 +16,8 @@ spec:
       containers:
       - name: tmf669
         image: go-oda-tmf669:latest
+        imagePullSecrets:
+        - name: regcred
         ports:
         - containerPort: 8082
         env:
