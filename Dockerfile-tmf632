@@ -25,4 +25,4 @@ COPY --from=builder-tmf632 /app/tmf632 .
 
 EXPOSE 8081
 
-CMD ["./oda/tmf632"]
+CMD ["./tmf632"]
