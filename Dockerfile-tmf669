@@ -1,0 +1,28 @@
+# Build Stage for tmf669
+FROM golang:1.23.1 AS builder-tmf669
+
+WORKDIR /app
+
+# Copy tmf669 source code and Go modules
+COPY ./oda/tmf669 ./oda/tmf669
+COPY ./go.mod ./go.sum ./
+
+# Install Go dependencies
+RUN go mod tidy
+
+# Build the Go binary for tmf669
+RUN go build -o /app/tmf669 ./oda/tmf669
+
+# Final image for tmf669
+FROM alpine:latest AS final-tmf669
+
+RUN apk --no-cache add ca-certificates postgresql-client
+
+WORKDIR /app
+
+# Copy the tmf669 binary from the builder-tmf669 stage
+COPY --from=builder-tmf669 /app/tmf669 /app/tmf669
+
+EXPOSE 8081
+
+CMD ["./tmf669"]

@@ -29,8 +29,8 @@ jobs:
       # Build Docker images
       - name: Build Docker Image
         run: |
-          docker build -t go-oda-tmf632:latest -f Dockerfile .
-          docker build -t go-oda-tmf669:latest -f Dockerfile .
+          docker build -t go-oda-tmf632:latest -f Dockerfile-tmf632 .
+          docker build -t go-oda-tmf669:latest -f Dockerfile-tmf669 .
 
       # Push Docker images
       - name: Push Docker Image
