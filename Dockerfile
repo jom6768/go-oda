@@ -8,7 +8,7 @@ COPY ./oda/tmf632 ./oda/tmf632
 COPY ./go.mod ./go.sum ./
 
 # Install Go dependencies
-RUN go mod download
+RUN go mod tidy
 
 # Build the Go binary for tmf632
 RUN go build -o /app/tmf632 ./oda/tmf632
@@ -23,7 +23,7 @@ COPY ./oda/tmf669 ./oda/tmf669
 COPY ./go.mod ./go.sum ./
 
 # Install Go dependencies
-RUN go mod download
+RUN go mod tidy
 
 # Build the Go binary for tmf669
 RUN go build -o /app/tmf669 ./oda/tmf669
@@ -38,7 +38,7 @@ WORKDIR /app
 # Copy the tmf632 binary from the builder-tmf632 stage
 COPY --from=builder-tmf632 /app/tmf632 /app/tmf632
 
-EXPOSE 8081
+EXPOSE 8080
 
 CMD ["./tmf632"]
 
@@ -52,6 +52,6 @@ WORKDIR /app
 # Copy the tmf669 binary from the builder-tmf669 stage
 COPY --from=builder-tmf669 /app/tmf669 /app/tmf669
 
-EXPOSE 8082
+EXPOSE 8081
 
 CMD ["./tmf669"]

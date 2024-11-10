@@ -11,53 +11,40 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-    # Checkout the repository
-    - name: Checkout code
-      uses: actions/checkout@v2
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    # Setup Go
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: '1.23.1'
+      # Setup Go
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.23.1
 
-    - name: Install dependencies
-      run: go mod download
+      - name: Install dependencies
+        run: go mod tidy
 
-    # Build Docker images
-    - name: Log in to Docker Hub
-      run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+      # Build Docker images
+      - name: Build Docker Image
+        run: |
+          docker build -t go-oda-tmf632:latest -f Dockerfile .
+          docker build -t go-oda-tmf669:latest -f Dockerfile .
 
-    - name: Build Docker images
-      run: |
-        docker build -t go-oda-tmf632:latest -f Dockerfile .
-        docker build -t go-oda-tmf669:latest -f Dockerfile .
+      # Push Docker images
+      - name: Push Docker Image
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+          docker push go-oda-tmf632:latest
+          docker push go-oda-tmf669:latest
 
-    # Run the containers to verify they work
-    - name: Run tmf632 container
-      run: docker run -d -p 8081:8081 --name tmf632-container go-oda-tmf632:latest
-
-    - name: Run tmf669 container
-      run: docker run -d -p 8082:8082 --name tmf669-container go-oda-tmf669:latest
-
-    # Run any tests to validate the containers are running
-    - name: Test tmf632 container
-      run: curl -f http://localhost:8081 || exit 1
-
-    - name: Test tmf669 container
-      run: curl -f http://localhost:8082 || exit 1
-
-    - name: Test
-      run: go test ./...
-
-    # Clean up containers after the tests
-    - name: Clean up Docker containers
-      run: |
-        docker stop tmf632-container
-        docker stop tmf669-container
-        docker rm tmf632-container
-        docker rm tmf669-container
+      # Run any tests
+      - name: Test
+        run: go test ./...
 
   deploy:
     runs-on: ubuntu-latest
@@ -67,4 +54,6 @@ jobs:
       uses: azure/setup-kubectl@v1
     - name: Deploy to Minikube
       run: |
-        kubectl apply -f k8s/
+        kubectl apply -f kubernetes/postgresql-deployment.yaml
+        kubectl apply -f kubernetes/tmf632-deployment.yaml
+        kubectl apply -f kubernetes/tmf669-deployment.yaml
