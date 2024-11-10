@@ -11,7 +11,7 @@ COPY ./go.mod ./go.sum ./
 RUN go mod tidy
 
 # Build the Go binary for tmf632
-RUN go build -o /app/tmf632 .
+RUN go build -o /app/tmf632 ./oda/tmf632
 
 # Final image for tmf632
 FROM alpine:latest AS final-tmf632
@@ -21,8 +21,8 @@ RUN apk --no-cache add ca-certificates postgresql-client
 WORKDIR /app
 
 # Copy the tmf632 binary from the builder-tmf632 stage
-COPY --from=builder-tmf632 /app/tmf632 /app/tmf632
+COPY --from=builder-tmf632 /app/tmf632 .
 
 EXPOSE 8081
 
-CMD ["./tmf632"]
+CMD ["./oda/tmf632"]
