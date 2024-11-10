@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: tmf669
-        image: go-oda-tmf669:latest
+        image: jom6768/go-oda-tmf669:latest
         ports:
         - containerPort: 8081
         env:

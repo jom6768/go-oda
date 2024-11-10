@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: tmf632
-        image: go-oda-tmf632:latest
+        image: jom6768/go-oda-tmf632:latest
         ports:
         - containerPort: 8080
         env:
