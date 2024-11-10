@@ -11,7 +11,7 @@ COPY ./go.mod ./go.sum ./
 RUN go mod tidy
 
 # Build the Go binary for tmf669
-RUN go build -o /app/tmf669 ./oda/tmf669
+RUN go build -o /app/tmf669 .
 
 # Final image for tmf669
 FROM alpine:latest AS final-tmf669
