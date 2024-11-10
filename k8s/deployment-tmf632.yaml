@@ -19,8 +19,16 @@ spec:
         ports:
         - containerPort: 8081
         env:
-        - name: DATABASE_URL
-          value: "postgres://user:password@postgres:5432/go_oda?sslmode=disable"
+        - name: DB_HOST
+          value: "localhost"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_USER
+          value: "user"
+        - name: DB_PASSWORD
+          value: "password"
+        - name: DB_NAME
+          value: "go_oda"
 
 ---
 
