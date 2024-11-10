@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main
+      - oda
   pull_request:
 
 jobs:
@@ -37,11 +37,11 @@ jobs:
 
     - name: Build Docker images
       run: |
-        docker build -t go-oda-tmf632:$GITHUB_SHA -f Dockerfile .
-        docker tag go-oda-tmf632:$GITHUB_SHA jom6768/go-oda-tmf632:latest
+        docker build -t go-oda-tmf632:latest -f Dockerfile .
+        docker tag go-oda-tmf632:latest jom6768/go-oda-tmf632:latest
         docker push jom6768/go-oda-tmf632:latest
-        docker build -t go-oda-tmf669:$GITHUB_SHA -f Dockerfile .
-        docker tag go-oda-tmf669:$GITHUB_SHA jom6768/go-oda-tmf669:latest
+        docker build -t go-oda-tmf669:latest -f Dockerfile .
+        docker tag go-oda-tmf669:latest jom6768/go-oda-tmf669:latest
         docker push jom6768/go-oda-tmf669:latest
 
   deploy:
