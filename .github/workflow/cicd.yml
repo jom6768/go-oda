@@ -56,6 +56,6 @@ jobs:
       uses: azure/setup-kubectl@v1
     - name: Deploy to Minikube
       run: |
-        kubectl apply -f kubernetes/postgresql-deployment.yaml
-        kubectl apply -f kubernetes/tmf632-deployment.yaml
-        kubectl apply -f kubernetes/tmf669-deployment.yaml
+        kubectl apply -f k8s/deployment-postgresql.yaml
+        kubectl apply -f k8s/deployment-tmf632.yaml
+        kubectl apply -f k8s/deployment-tmf669.yaml

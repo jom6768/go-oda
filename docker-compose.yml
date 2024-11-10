@@ -10,11 +10,11 @@ services:
 
   tmf632:
     build: .
-    command: go run oda/tmf632/main.go
+    command: go run ./oda/tmf632/main.go
     depends_on:
       - db
   tmf669:
     build: .
-    command: go run oda/tmf669/main.go
+    command: go run ./oda/tmf669/main.go
     depends_on:
       - db

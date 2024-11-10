@@ -23,6 +23,6 @@ WORKDIR /app
 # Copy the tmf669 binary from the builder-tmf669 stage
 COPY --from=builder-tmf669 /app/tmf669 /app/tmf669
 
-EXPOSE 8081
+EXPOSE 8082
 
 CMD ["./tmf669"]

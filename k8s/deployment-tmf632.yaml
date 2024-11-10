@@ -17,7 +17,7 @@ spec:
       - name: tmf632
         image: jom6768/go-oda-tmf632:latest
         ports:
-        - containerPort: 8080
+        - containerPort: 8081
         env:
         - name: DATABASE_URL
           value: "postgres://user:password@postgres:5432/go_oda?sslmode=disable"
@@ -34,6 +34,6 @@ spec:
     app: tmf632  # Match the selector with the app labels in your pods
   ports:
     - protocol: TCP
-      port: 8080  # Internal port within the cluster
-      targetPort: 8080  # The port your container is listening on
+      port: 8081  # Internal port within the cluster
+      targetPort: 8081  # The port your container is listening on
   type: ClusterIP  # Default type, internal access only
