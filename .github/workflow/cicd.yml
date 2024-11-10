@@ -39,8 +39,10 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-          docker push go-oda-tmf632:latest
-          docker push go-oda-tmf669:latest
+          docker tag go-oda-tmf632:latest jom6768/go-oda-tmf632:latest
+          docker push jom6768/go-oda-tmf632:latest
+          docker tag go-oda-tmf669:latest jom6768/go-oda-tmf669:latest
+          docker push jom6768/go-oda-tmf669:latest
 
       # Run any tests
       - name: Test
