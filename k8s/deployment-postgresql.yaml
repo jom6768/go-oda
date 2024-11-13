@@ -14,15 +14,15 @@ spec:
         app: postgres
     spec:
       containers:
-      - name: postgres
-        image: postgres:16
+      - name: go-oda-postgres
+        image: postgres:latest
         ports:
         - containerPort: 5432
         env:
         - name: POSTGRES_USER
-          value: "user"
+          value: "myuser"
         - name: POSTGRES_PASSWORD
-          value: "password"
+          value: "mypass"
         - name: POSTGRES_DB
           value: "go_oda"
 

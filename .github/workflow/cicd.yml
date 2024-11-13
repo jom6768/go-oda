@@ -24,13 +24,12 @@ jobs:
           go-version: 1.23.1
 
       - name: Install dependencies
-        run: go mod tidy
+        run: go mod download
 
       # Build Docker images
       - name: Build Docker Image
         run: |
-          docker build -t go-oda-tmf632:latest -f Dockerfile-tmf632 .
-          docker build -t go-oda-tmf669:latest -f Dockerfile-tmf669 .
+          docker build . --no-cache -t jom6768/go-oda-tmf632 -f Dockerfile
 
       # Push Docker images
       - name: Push Docker Image
@@ -39,10 +38,7 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-          docker tag go-oda-tmf632:latest jom6768/go-oda-tmf632:latest
           docker push jom6768/go-oda-tmf632:latest
-          docker tag go-oda-tmf669:latest jom6768/go-oda-tmf669:latest
-          docker push jom6768/go-oda-tmf669:latest
 
       # Run any tests
       - name: Test
@@ -55,7 +51,6 @@ jobs:
     - name: Setup Kubectl
       uses: azure/setup-kubectl@v1
     - name: Deploy to Minikube
+      # kubectl apply -f k8s/deployment-postgresql.yaml
       run: |
-        kubectl apply -f k8s/deployment-postgresql.yaml
         kubectl apply -f k8s/deployment-tmf632.yaml
-        kubectl apply -f k8s/deployment-tmf669.yaml

@@ -14,21 +14,10 @@ spec:
         app: tmf632
     spec:
       containers:
-      - name: tmf632
+      - name: go-oda-tmf632
         image: jom6768/go-oda-tmf632:latest
         ports:
         - containerPort: 8081
-        env:
-        - name: DB_HOST
-          value: "localhost"
-        - name: DB_PORT
-          value: "5432"
-        - name: DB_USER
-          value: "user"
-        - name: DB_PASSWORD
-          value: "password"
-        - name: DB_NAME
-          value: "go_oda"
 
 ---
 

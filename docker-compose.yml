@@ -1,22 +1,27 @@
 services:
-  db:
-    image: postgres:16
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: go_oda
-    ports:
-      - "5432:5432"
+  # db:
+  #   image: postgres:latest
+  #   container_name: go-oda-postgres
+  #   environment:
+  #     POSTGRES_USER: myuser
+  #     POSTGRES_PASSWORD: mypass
+  #     POSTGRES_DB: go_oda
+  #   ports:
+  #     - "5432:5432"
+    # networks:
+    #   - go_oda_network
 
   tmf632:
     build: .
-    env_file: .env
-    command: go run ./oda/tmf632/main.go
-    depends_on:
-      - db
-  tmf669:
-    build: .
-    env_file: .env
-    command: go run ./oda/tmf669/main.go
-    depends_on:
-      - db
+    container_name: go-oda-tmf632
+    image: jom6768/go-oda-tmf632:latest
+    ports:
+      - "8081:8081"
+    # networks:
+    #   - go_oda_network
+    # depends_on:
+    #   - db
+
+# networks:
+#   go_oda_network:
+#     driver: bridge
