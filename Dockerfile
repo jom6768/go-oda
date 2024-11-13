@@ -24,5 +24,5 @@ WORKDIR /app
 COPY --from=builder-tmf632 /app/tmf632 ./tmf632
 
 EXPOSE 8081
-# # go run ./oda/tmf632/main.go
+
 CMD ["./tmf632"]
