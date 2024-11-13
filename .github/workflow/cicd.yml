@@ -54,3 +54,4 @@ jobs:
       # kubectl apply -f k8s/deployment-postgresql.yaml
       run: |
         kubectl apply -f k8s/deployment-tmf632.yaml
+        kubectl port-forward svc/tmf632 8081:8081
