@@ -1,10 +1,11 @@
 # Build Stage for tmf632
-FROM golang:1.23.1-alpine AS builder-tmf632
+FROM golang:1.23-alpine AS builder-tmf632
 
 WORKDIR /app
 
 # Copy tmf632 source code and Go modules
-COPY . .
+COPY ./oda/tmf632 ./
+COPY ./go.mod ./go.sum ./
 
 # Install Go dependencies
 RUN go mod download
