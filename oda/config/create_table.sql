@@ -20,7 +20,7 @@ GRANT ALL PRIVILEGES ON DATABASE go_oda TO myuser;
 GRANT ALL ON SCHEMA public TO myuser;
 
 -- TMF632_Party Management API
-CREATE TABLE customer (
+CREATE TABLE individual (
     id VARCHAR(50) PRIMARY KEY NOT NULL,
     gender VARCHAR(20),
     countryOfBirth VARCHAR(50),
@@ -39,26 +39,30 @@ CREATE TABLE customer (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO customer (id, gender, countryOfBirth, nationality, maritalStatus, birthDate, givenName, preferredGivenName, familyName, legalName, middleName, fullName, formattedName, status)
+INSERT INTO individual (id, gender, countryOfBirth, nationality, maritalStatus, birthDate, givenName, preferredGivenName, familyName, legalName, middleName, fullName, formattedName, status)
 VALUES ('42', 'female', 'United States', 'American', 'married', '1967-09-26T05:00:00.246Z', 'Jane', 'Lamborgizzia', 'Lamborgizzia', 'Smith', 'JL', 'Jane Smith ep Lamborgizzia', 'Jane Smith ep Lamborgizzia', 'validated') RETURNING id;
+INSERT INTO individual (id, gender, countryOfBirth, nationality, maritalStatus, birthDate, givenName, preferredGivenName, familyName, legalName, middleName, fullName, formattedName, status)
+VALUES ('43', 'male', 'Thailand', 'Thai', 'single', '1988-08-08T00:00:00.000Z', 'Jane', 'Lamborgizzia', 'Lamborgizzia', 'Smith', 'JL', 'Jane Smith ep Lamborgizzia', 'Jane Smith ep Lamborgizzia', 'active') RETURNING id;
+INSERT INTO individual (id, birthDate, fullName)
+VALUES ('44', '1988-08-08T00:00:00.000Z', 'Jane Smith ep Lamborgizzia') RETURNING id;
 
-SELECT id, gender, countryOfBirth, nationality, maritalStatus, birthDate, givenName, preferredGivenName, familyName, legalName, middleName, fullName, formattedName, status FROM customer;
+SELECT id, gender, countryOfBirth, nationality, maritalStatus, birthDate, givenName, preferredGivenName, familyName, legalName, middleName, fullName, formattedName, status FROM individual;
 
 CREATE TABLE externalReference (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50),
     externalIdentifierType VARCHAR(20),
     type VARCHAR(20),
-    customer_id VARCHAR(50) REFERENCES customer (id),
+    individual_id VARCHAR(50) REFERENCES individual (id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO externalReference (name, externalIdentifierType, type, customer_id) VALUES ('http://facebook.com/17263635', 'facebookId', 'ExternalIdentifier', '42');
-INSERT INTO externalReference (name, externalIdentifierType, type, customer_id) VALUES ('http://google.com/17263635', 'googleId', 'ExternalIdentifier', '42');
-INSERT INTO externalReference (name, externalIdentifierType, type, customer_id) VALUES ('http://facebook.com/17263635', 'facebookId', 'ExternalIdentifier', '44');
+INSERT INTO externalReference (name, externalIdentifierType, type, individual_id) VALUES ('http://facebook.com/17263635', 'facebookId', 'ExternalIdentifier', '42');
+INSERT INTO externalReference (name, externalIdentifierType, type, individual_id) VALUES ('http://google.com/17263635', 'googleId', 'ExternalIdentifier', '42');
+INSERT INTO externalReference (name, externalIdentifierType, type, individual_id) VALUES ('http://facebook.com/17263636', 'facebookId', 'ExternalIdentifier', '44');
 
-SELECT name, externalIdentifierType, type FROM externalReference WHERE customer_id = '42';
+SELECT name, externalIdentifierType, type FROM externalReference WHERE individual_id = '42';
 
 {
   "id": "42",
@@ -88,7 +92,7 @@ SELECT name, externalIdentifierType, type FROM externalReference WHERE customer_
 }
 
 -- Drop Table
-DROP TABLE customer;
+DROP TABLE individual;
 
 -- Drop database
 DROP DATABASE go_oda WITH (FORCE);

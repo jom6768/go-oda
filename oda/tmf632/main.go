@@ -11,7 +11,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type Customer struct {
+type Individual struct {
 	ID                 string               `json:"id" binding:"required"`
 	Href               string               `json:"href"`
 	Type               string               `json:"@type"`
@@ -60,26 +60,127 @@ func initDB() {
 	}
 }
 
-// createCustomer creates a new customer
-func createCustomer(c *gin.Context) {
-	var newCustomer Customer
-	if err := c.ShouldBindJSON(&newCustomer); err != nil {
+// getIndividuals retrieves a individual
+func getIndividuals(c *gin.Context) {
+	var individuals []Individual
+
+	query := `SELECT id, gender, countryOfBirth, nationality, maritalStatus, birthDate, givenName, preferredGivenName, familyName, legalName, middleName, fullName, formattedName, status FROM individual`
+	rows, err := db.Query(query)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve individuals"})
+		return
+	}
+	defer rows.Close()
+
+	// Iterate over the result set and populate the slice
+	for rows.Next() {
+		var individual Individual
+		if err := rows.Scan(&individual.ID, &individual.Gender, &individual.CountryOfBirth, &individual.Nationality, &individual.MaritalStatus, &individual.BirthDate, &individual.GivenName, &individual.PreferredGivenName, &individual.FamilyName, &individual.LegalName, &individual.MiddleName, &individual.FullName, &individual.FormattedName, &individual.Status); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan individual"})
+			return
+		}
+
+		// Set the custom field
+		individual.Href = "http://localhost:8081/tmf-api/party/v5/individual/" + individual.ID
+		individual.Type = "Individual"
+		individual.BaseType = "Party"
+
+		if errMsg := getExternalReference(&individual); errMsg != "" {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": errMsg})
+			return
+		}
+
+		// Append to the individuals slice
+		individuals = append(individuals, individual)
+	}
+
+	// Check for errors encountered during iteration
+	if err = rows.Err(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while fetching individuals"})
+		return
+	}
+
+	c.JSON(http.StatusOK, individuals)
+}
+
+// getIndividualById retrieves a individual by ID
+func getIndividualById(c *gin.Context) {
+	id := c.Param("id")
+	var individual Individual
+
+	query := `SELECT id, gender, countryOfBirth, nationality, maritalStatus, birthDate, givenName, preferredGivenName, familyName, legalName, middleName, fullName, formattedName, status FROM individual WHERE id = $1 LIMIT 1`
+	row := db.QueryRow(query, id)
+	if err := row.Scan(&individual.ID, &individual.Gender, &individual.CountryOfBirth, &individual.Nationality, &individual.MaritalStatus, &individual.BirthDate, &individual.GivenName, &individual.PreferredGivenName, &individual.FamilyName, &individual.LegalName, &individual.MiddleName, &individual.FullName, &individual.FormattedName, &individual.Status); err != nil {
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Individual not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve individual"})
+		return
+	}
+
+	// Set the custom field
+	individual.Href = "http://localhost:8081/tmf-api/party/v5/individual/" + individual.ID
+	individual.Type = "Individual"
+	individual.BaseType = "Party"
+
+	if errMsg := getExternalReference(&individual); errMsg != "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": errMsg})
+		return
+	}
+
+	c.JSON(http.StatusOK, individual)
+}
+
+// updateIndividual updates a individual
+func updateIndividual(c *gin.Context) {
+	// id := c.Param("id")
+	var individual Individual
+
+	// query := `SELECT id, gender, countryOfBirth, nationality, maritalStatus, birthDate, givenName, preferredGivenName, familyName, legalName, middleName, fullName, formattedName, status FROM individual WHERE id = $1 LIMIT 1`
+	// row := db.QueryRow(query, id)
+	// if err := row.Scan(&individual.ID, &individual.Gender, &individual.CountryOfBirth, &individual.Nationality, &individual.MaritalStatus, &individual.BirthDate, &individual.GivenName, &individual.PreferredGivenName, &individual.FamilyName, &individual.LegalName, &individual.MiddleName, &individual.FullName, &individual.FormattedName, &individual.Status); err != nil {
+	// 	if err == sql.ErrNoRows {
+	// 		c.JSON(http.StatusNotFound, gin.H{"error": "Individual not found"})
+	// 		return
+	// 	}
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve individual"})
+	// 	return
+	// }
+
+	// // Set the custom field
+	// individual.Href = "http://localhost:8081/tmf-api/party/v5/individual/" + individual.ID
+	// individual.Type = "Individual"
+	// individual.BaseType = "Party"
+
+	// if errMsg := getExternalReference(&individual); errMsg != "" {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": errMsg})
+	// 	return
+	// }
+
+	c.JSON(http.StatusOK, individual)
+}
+
+// createIndividual creates a new individual
+func createIndividual(c *gin.Context) {
+	var newIndividual Individual
+	if err := c.ShouldBindJSON(&newIndividual); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	query := `INSERT INTO customer (id, gender, countryOfBirth, nationality, maritalStatus, birthDate, givenName, preferredGivenName, familyName, legalName, middleName, fullName, formattedName, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id`
-	err := db.QueryRow(query, newCustomer.ID, newCustomer.Gender, newCustomer.CountryOfBirth, newCustomer.Nationality, newCustomer.MaritalStatus, newCustomer.BirthDate, newCustomer.GivenName, newCustomer.PreferredGivenName, newCustomer.FamilyName, newCustomer.LegalName, newCustomer.MiddleName, newCustomer.FullName, newCustomer.FormattedName, newCustomer.Status).Scan(&newCustomer.ID)
+	query := `INSERT INTO individual (id, gender, countryOfBirth, nationality, maritalStatus, birthDate, givenName, preferredGivenName, familyName, legalName, middleName, fullName, formattedName, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id`
+	err := db.QueryRow(query, newIndividual.ID, newIndividual.Gender, newIndividual.CountryOfBirth, newIndividual.Nationality, newIndividual.MaritalStatus, newIndividual.BirthDate, newIndividual.GivenName, newIndividual.PreferredGivenName, newIndividual.FamilyName, newIndividual.LegalName, newIndividual.MiddleName, newIndividual.FullName, newIndividual.FormattedName, newIndividual.Status).Scan(&newIndividual.ID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert customer" + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert individual" + err.Error()})
 		return
 	}
 
-	if newCustomer.ExternalReferences != nil {
-		for _, externalReference := range *newCustomer.ExternalReferences {
+	if newIndividual.ExternalReferences != nil {
+		for _, externalReference := range *newIndividual.ExternalReferences {
 			var id int
-			query = `INSERT INTO externalReference (name, externalIdentifierType, type, customer_id) VALUES ($1, $2, $3, $4) RETURNING id`
-			err := db.QueryRow(query, externalReference.Name, externalReference.ExternalIdentifierType, externalReference.Type, newCustomer.ID).Scan(&id)
+			query = `INSERT INTO externalReference (name, externalIdentifierType, type, individual_id) VALUES ($1, $2, $3, $4) RETURNING id`
+			err := db.QueryRow(query, externalReference.Name, externalReference.ExternalIdentifierType, externalReference.Type, newIndividual.ID).Scan(&id)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert externalReference" + err.Error()})
 				return
@@ -87,98 +188,26 @@ func createCustomer(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusCreated, newCustomer)
+	c.JSON(http.StatusCreated, newIndividual)
 }
 
-// getCustomers retrieves a customer
-func getCustomers(c *gin.Context) {
-	var customers []Customer
-
-	query := `SELECT id, gender, countryOfBirth, nationality, maritalStatus, birthDate, givenName, preferredGivenName, familyName, legalName, middleName, fullName, formattedName, status FROM customer`
-	rows, err := db.Query(query)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve customers"})
-		return
-	}
-	defer rows.Close()
-
-	// Iterate over the result set and populate the slice
-	for rows.Next() {
-		var customer Customer
-		if err := rows.Scan(&customer.ID, &customer.Gender, &customer.CountryOfBirth, &customer.Nationality, &customer.MaritalStatus, &customer.BirthDate, &customer.GivenName, &customer.PreferredGivenName, &customer.FamilyName, &customer.LegalName, &customer.MiddleName, &customer.FullName, &customer.FormattedName, &customer.Status); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan customer"})
-			return
-		}
-
-		// Set the custom field
-		customer.Href = "https://serverRoot/tmf-api/party/v5/individual/" + customer.ID
-		customer.Type = "Individual"
-		customer.BaseType = "Party"
-
-		if errMsg := getExternalReference(&customer); errMsg != "" {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": errMsg})
-			return
-		}
-
-		// Append to the customers slice
-		customers = append(customers, customer)
-	}
-
-	// Check for errors encountered during iteration
-	if err = rows.Err(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while fetching customers"})
-		return
-	}
-
-	c.JSON(http.StatusOK, customers)
-}
-
-// getCustomerById retrieves a customer by ID
-func getCustomerById(c *gin.Context) {
-	id := c.Param("id")
-	var customer Customer
-
-	query := `SELECT id, gender, countryOfBirth, nationality, maritalStatus, birthDate, givenName, preferredGivenName, familyName, legalName, middleName, fullName, formattedName, status FROM customer WHERE id = $1 LIMIT 1`
-	row := db.QueryRow(query, id)
-	if err := row.Scan(&customer.ID, &customer.Gender, &customer.CountryOfBirth, &customer.Nationality, &customer.MaritalStatus, &customer.BirthDate, &customer.GivenName, &customer.PreferredGivenName, &customer.FamilyName, &customer.LegalName, &customer.MiddleName, &customer.FullName, &customer.FormattedName, &customer.Status); err != nil {
-		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Customer not found"})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve customer"})
-		return
-	}
-
-	// Set the custom field
-	customer.Href = "https://serverRoot/tmf-api/party/v5/individual/" + customer.ID
-	customer.Type = "Individual"
-	customer.BaseType = "Party"
-
-	if errMsg := getExternalReference(&customer); errMsg != "" {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": errMsg})
-		return
-	}
-
-	c.JSON(http.StatusOK, customer)
-}
-
-// deleteCustomerById deletes a customer by ID
-func deleteCustomerById(c *gin.Context) {
+// deleteIndividualById deletes a individual by ID
+func deleteIndividualById(c *gin.Context) {
 	id := c.Param("id")
 
-	query := `DELETE FROM externalReference WHERE customer_id = $1`
+	query := `DELETE FROM externalReference WHERE individual_id = $1`
 	res, err := db.Exec(query, id)
 	if err == nil {
 		count, err := res.RowsAffected()
 		if err == nil {
 			if count >= 1 {
-				c.JSON(http.StatusOK, fmt.Sprintf("Delete externalReferences of customer: %s completed\n", id))
+				c.JSON(http.StatusOK, fmt.Sprintf("Delete externalReferences of individual: %s completed\n", id))
 			}
 		}
 	}
-	log.Println("no externalReferences of customer:", id)
+	log.Println("no externalReferences of individual:", id)
 
-	query = `DELETE FROM customer WHERE id = $1`
+	query = `DELETE FROM individual WHERE id = $1`
 	res, err = db.Exec(query, id)
 	if err == nil {
 		count, err := res.RowsAffected()
@@ -189,14 +218,14 @@ func deleteCustomerById(c *gin.Context) {
 			}
 		}
 	}
-	c.JSON(http.StatusNotFound, gin.H{"error": "Customer not found"})
+	c.JSON(http.StatusNotFound, gin.H{"error": "Individual not found"})
 }
 
-func getExternalReference(customer *Customer) string {
+func getExternalReference(individual *Individual) string {
 	var externalReferences []ExternalReference
 
-	query := `SELECT name, externalIdentifierType, type FROM externalReference WHERE customer_id = $1`
-	rows, err := db.Query(query, customer.ID)
+	query := `SELECT name, externalIdentifierType, type FROM externalReference WHERE individual_id = $1`
+	rows, err := db.Query(query, individual.ID)
 	if err != nil {
 		return "Failed to retrieve externalReferences"
 	}
@@ -219,7 +248,7 @@ func getExternalReference(customer *Customer) string {
 	}
 
 	if externalReferences != nil {
-		customer.ExternalReferences = &externalReferences
+		individual.ExternalReferences = &externalReferences
 	}
 	return ""
 }
@@ -229,9 +258,10 @@ func main() {
 	defer db.Close()
 
 	r := gin.Default()
-	r.POST("/tmf632/customer", createCustomer)
-	r.GET("/tmf632/customers", getCustomers)
-	r.GET("/tmf632/customer/:id", getCustomerById)
-	r.DELETE("/tmf632/customer/:id", deleteCustomerById)
+	r.GET("/tmf-api/party/v5/individuals", getIndividuals)
+	r.GET("/tmf-api/party/v5/individual/:id", getIndividualById)
+	r.POST("/tmf-api/party/v5/individual", createIndividual)
+	r.PATCH("/tmf-api/party/v5/individual", updateIndividual)
+	r.DELETE("/tmf-api/party/v5/individual/:id", deleteIndividualById)
 	r.Run(":8081")
 }
