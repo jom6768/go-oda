@@ -1,0 +1,23 @@
+curl -X GET http://localhost:8081/tmf-api/party/v5/individuals
+
+curl -X GET http://localhost:8081/tmf-api/party/v5/individual/42
+
+curl -X POST http://localhost:8081/tmf-api/party/v5/individual -d '{"id": "42", "@type": "Individual", "@baseType": "Party", "gender": "female", "countryOfBirth": "United States","nationality": "American","maritalStatus": "married","givenName": "Jane","preferredGivenName": "Lamborgizzia","familyName": "Lamborgizzia","legalName": "Smith","middleName": "JL","fullName": "Jane Smith ep Lamborgizzia","formattedName": "Jane Smith ep Lamborgizzia","status": "validated"}' -H "Content-Type: application/json"
+
+curl -X POST http://localhost:8081/tmf-api/party/v5/individual -d '{"id": "43", "gender": "female", "countryOfBirth": "United States","nationality": "American","maritalStatus": "married","birthDate": "1967-09-26T05:00:00.246Z","givenName": "Jane","preferredGivenName": "Lamborgizzia","familyName": "Lamborgizzia","legalName": "Smith","middleName": "JL","fullName": "Jane Smith ep Lamborgizzia","formattedName": "Jane Smith ep Lamborgizzia","status": "validated"}' -H "Content-Type: application/json"
+
+curl -X POST http://localhost:8081/tmf-api/party/v5/individual -d '{"id": "46", "fullName": "Jane Smith ep Lamborgizzia", "externalReference": [{"name": "http://facebook.com/17263639","externalIdentifierType": "facebookId", "@type": "ExternalIdentifier"},{"name": "http://google.com/17263639","externalIdentifierType": "googleId", "@type": "ExternalIdentifier"}]}' -H "Content-Type: application/json"
+
+curl -X PATCH http://localhost:8081/tmf-api/party/v5/individual -d '{"id": "46", "@type": "Individual", "gender": "male","status": "active"}' -H "Content-Type: application/json"
+
+curl -X DELETE http://localhost:8081/tmf-api/party/v5/individual/46
+
+curl -X GET http://localhost:8081/tmf-api/party/v5/organizations
+
+curl -X GET http://localhost:8081/tmf-api/party/v5/organization/128
+
+curl -X POST http://localhost:8081/tmf-api/party/v5/organization -d '{"id": "129", "isLegalEntity":"false","isHeadOffice":"true","organizationType":"company","name":"Tea","tradingName":"Tea One","nameType":"inc","status":"active","externalReference":[{"name":"http://teaone.com","externalIdentifierType":"internetSite","@type":"ExternalIdentifier"},{"name": "http://facebook.com/teaone","externalIdentifierType": "facebookId", "@type": "ExternalIdentifier"}]}' -H "Content-Type: application/json"
+
+curl -X PATCH http://localhost:8081/tmf-api/party/v5/organization -d '{"id": "129","tradingName": "TeaTwo","status": "checking"}' -H "Content-Type: application/json"
+
+curl -X DELETE http://localhost:8081/tmf-api/party/v5/organization/129
