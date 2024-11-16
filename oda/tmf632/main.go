@@ -56,12 +56,12 @@ var db *sql.DB
 
 func initDB() {
 	var err error
-	// Run Local
-	connStr := "postgresql://myuser:mypass@localhost:5432/go_oda?sslmode=disable"
-	// Run on Docker
+	// Run Local (go run ./oda/tmf632/main.go)
+	// connStr := "postgresql://myuser:mypass@localhost:5432/go_oda?sslmode=disable"
+	// Run on Docker (docker-compose up --build -d)
 	// connStr := "postgresql://myuser:mypass@host.docker.internal:5432/go_oda?sslmode=disable"
 	// Run on Minikube
-	// connStr := "postgresql://myuser:mypass@host.minikube.internal:5432/go_oda?sslmode=disable"
+	connStr := "postgresql://myuser:mypass@host.minikube.internal:5432/go_oda?sslmode=disable"
 	log.Println(connStr)
 	for i := 0; i < 5; i++ {
 		db, err = sql.Open("postgres", connStr)
