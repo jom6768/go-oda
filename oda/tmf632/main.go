@@ -15,7 +15,7 @@ import (
 type Individual struct {
 	ID                 string               `json:"id" binding:"required"`
 	Href               string               `json:"href,omitempty"`
-	Type               string               `json:"@type,omitempty"`
+	Type               string               `json:"@type" binding:"required"`
 	BaseType           string               `json:"@baseType,omitempty"`
 	Gender             string               `json:"gender,omitempty"`
 	CountryOfBirth     string               `json:"countryOfBirth,omitempty"`
@@ -29,22 +29,20 @@ type Individual struct {
 	MiddleName         string               `json:"middleName,omitempty"`
 	FullName           string               `json:"fullName,omitempty"`
 	FormattedName      string               `json:"formattedName,omitempty"`
-	Status             string               `json:"status,omitempty"`
+	Status             string               `json:"status,omitempty"` //"initialized","validated","deceaded"
 	ExternalReferences *[]ExternalReference `json:"externalReference,omitempty"`
 }
 
 type Organization struct {
 	ID                 string               `json:"id" binding:"required"`
 	Href               string               `json:"href,omitempty"`
-	Type               string               `json:"@type,omitempty"`
+	Type               string               `json:"@type" binding:"required"`
 	BaseType           string               `json:"@baseType,omitempty"`
-	IsLegalEntity      string               `json:"isLegalEntity,omitempty"`
-	IsHeadOffice       string               `json:"isHeadOffice,omitempty"`
 	OrganizationType   string               `json:"organizationType,omitempty"`
 	Name               string               `json:"name,omitempty"`
 	TradingName        string               `json:"tradingName,omitempty"`
 	NameType           string               `json:"nameType,omitempty"`
-	Status             string               `json:"status,omitempty"`
+	Status             string               `json:"status,omitempty"` //"initialized","validated","closed"
 	ExternalReferences *[]ExternalReference `json:"externalReference,omitempty"`
 }
 
@@ -59,11 +57,11 @@ var db *sql.DB
 func initDB() {
 	var err error
 	// Run Local
-	// connStr := "postgresql://myuser:mypass@localhost:5432/go_oda?sslmode=disable"
+	connStr := "postgresql://myuser:mypass@localhost:5432/go_oda?sslmode=disable"
 	// Run on Docker
 	// connStr := "postgresql://myuser:mypass@host.docker.internal:5432/go_oda?sslmode=disable"
 	// Run on Minikube
-	connStr := "postgresql://myuser:mypass@host.minikube.internal:5432/go_oda?sslmode=disable"
+	// connStr := "postgresql://myuser:mypass@host.minikube.internal:5432/go_oda?sslmode=disable"
 	log.Println(connStr)
 	for i := 0; i < 5; i++ {
 		db, err = sql.Open("postgres", connStr)
@@ -79,12 +77,11 @@ func initDB() {
 // getIndividuals retrieves a individual
 func getIndividuals(c *gin.Context) {
 	var individuals []Individual
-
 	query := `SELECT par.id,COALESCE(par.href,''),COALESCE(ind.type,''),COALESCE(par.type,'') AS "baseType",COALESCE(ind.gender,''),COALESCE(ind.countryOfBirth,''),COALESCE(ind.nationality,''),COALESCE(ind.maritalStatus,''),COALESCE(ind.birthDate::TEXT,''),COALESCE(ind.givenName,''),COALESCE(ind.preferredGivenName,''),COALESCE(ind.familyName,''),COALESCE(ind.legalName,''),COALESCE(ind.middleName,''),ind.fullName,COALESCE(ind.formattedName,''),COALESCE(ind.status,'')
 		FROM party par INNER JOIN individual ind ON par.id=ind.party_id;`
 	rows, err := db.Query(query)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve individuals"})
+		c.JSON(http.StatusInternalServerError, gin.H{"@type": "Individual", "error": "Failed to retrieve individuals"})
 		return
 	}
 	defer rows.Close()
@@ -93,12 +90,12 @@ func getIndividuals(c *gin.Context) {
 	for rows.Next() {
 		var individual Individual
 		if err := rows.Scan(&individual.ID, &individual.Href, &individual.Type, &individual.BaseType, &individual.Gender, &individual.CountryOfBirth, &individual.Nationality, &individual.MaritalStatus, &individual.BirthDate, &individual.GivenName, &individual.PreferredGivenName, &individual.FamilyName, &individual.LegalName, &individual.MiddleName, &individual.FullName, &individual.FormattedName, &individual.Status); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan individual"})
+			c.JSON(http.StatusInternalServerError, gin.H{"@type": "Individual", "error": "Failed to scan individual"})
 			return
 		}
 
 		if errMsg := getExternalReference(&individual, individual.ID); errMsg != "" {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": errMsg})
+			c.JSON(http.StatusInternalServerError, gin.H{"@type": "Individual", "error": errMsg})
 			return
 		}
 
@@ -108,7 +105,7 @@ func getIndividuals(c *gin.Context) {
 
 	// Check for errors encountered during iteration
 	if err = rows.Err(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while fetching individuals"})
+		c.JSON(http.StatusInternalServerError, gin.H{"@type": "Individual", "error": "Error while fetching individuals"})
 		return
 	}
 
@@ -119,22 +116,21 @@ func getIndividuals(c *gin.Context) {
 func getIndividualById(c *gin.Context) {
 	id := c.Param("id")
 	var individual Individual
-
 	query := `SELECT par.id,COALESCE(par.href,''),COALESCE(ind.type,''),COALESCE(par.type,'') AS "baseType",COALESCE(ind.gender,''),COALESCE(ind.countryOfBirth,''),COALESCE(ind.nationality,''),COALESCE(ind.maritalStatus,''),COALESCE(ind.birthDate::TEXT,''),COALESCE(ind.givenName,''),COALESCE(ind.preferredGivenName,''),COALESCE(ind.familyName,''),COALESCE(ind.legalName,''),COALESCE(ind.middleName,''),ind.fullName,COALESCE(ind.formattedName,''),COALESCE(ind.status,'')
 		FROM party par INNER JOIN individual ind ON par.id=ind.party_id WHERE par.id = $1 LIMIT 1`
 	row := db.QueryRow(query, id)
 	if err := row.Scan(&individual.ID, &individual.Href, &individual.Type, &individual.BaseType, &individual.Gender, &individual.CountryOfBirth, &individual.Nationality, &individual.MaritalStatus, &individual.BirthDate, &individual.GivenName, &individual.PreferredGivenName, &individual.FamilyName, &individual.LegalName, &individual.MiddleName, &individual.FullName, &individual.FormattedName, &individual.Status); err != nil {
 		log.Println(err)
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Individual not found"})
+			c.JSON(http.StatusOK, gin.H{"@type": "Individual", "error": "Individual not found"})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve individual"})
+		c.JSON(http.StatusInternalServerError, gin.H{"@type": "Individual", "error": "Failed to retrieve individual"})
 		return
 	}
 
 	if errMsg := getExternalReference(&individual, individual.ID); errMsg != "" {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": errMsg})
+		c.JSON(http.StatusInternalServerError, gin.H{"@type": "Individual", "error": errMsg})
 		return
 	}
 
@@ -145,7 +141,7 @@ func getIndividualById(c *gin.Context) {
 func createIndividual(c *gin.Context) {
 	var newIndividual Individual
 	if err := c.ShouldBindJSON(&newIndividual); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusCreated, gin.H{"@type": "Individual", "error": err.Error()})
 		return
 	}
 
@@ -157,7 +153,7 @@ func createIndividual(c *gin.Context) {
 		// Parse the timestamp string into time.Time
 		parsedTime, err := time.Parse(time.RFC3339, newIndividual.BirthDate)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parsing timestamp " + err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"@type": "Individual", "error": "Failed to parsing timestamp " + err.Error()})
 			return
 		}
 
@@ -177,7 +173,7 @@ func createIndividual(c *gin.Context) {
 	`
 	err := db.QueryRow(query, newIndividual.ID, newIndividual.Href, newIndividual.Gender, newIndividual.CountryOfBirth, newIndividual.Nationality, newIndividual.MaritalStatus, birthDate, newIndividual.GivenName, newIndividual.PreferredGivenName, newIndividual.FamilyName, newIndividual.LegalName, newIndividual.MiddleName, newIndividual.FullName, newIndividual.FormattedName, newIndividual.Status).Scan(&newIndividual.ID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert individual " + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"@type": "Individual", "error": "Failed to insert individual " + err.Error()})
 		return
 	}
 
@@ -187,7 +183,7 @@ func createIndividual(c *gin.Context) {
 			query = `INSERT INTO externalReference (name, externalIdentifierType, type, party_id) VALUES ($1, $2, $3, $4) RETURNING id;`
 			err := db.QueryRow(query, externalReference.Name, externalReference.ExternalIdentifierType, externalReference.Type, newIndividual.ID).Scan(&id)
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert externalReference " + err.Error()})
+				c.JSON(http.StatusInternalServerError, gin.H{"@type": "Individual", "error": "Failed to insert externalReference " + err.Error()})
 				return
 			}
 		}
@@ -198,9 +194,10 @@ func createIndividual(c *gin.Context) {
 
 // updateIndividual updates a individual
 func updateIndividual(c *gin.Context) {
+	id := c.Param("id")
 	var individual Individual
 	if err := c.ShouldBindJSON(&individual); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusOK, gin.H{"@type": "Individual", "error": err.Error()})
 		return
 	}
 
@@ -278,7 +275,7 @@ func updateIndividual(c *gin.Context) {
 
 	// If no fields to update, return an error
 	if len(setClauses) == 0 {
-		c.JSON(http.StatusNotModified, gin.H{"error": "No fields to update"})
+		c.JSON(http.StatusNotModified, gin.H{"@type": "Individual", "error": "No fields to update"})
 		return
 	}
 
@@ -287,17 +284,15 @@ func updateIndividual(c *gin.Context) {
 
 	// Add the WHERE clause
 	query += fmt.Sprintf(" WHERE party_id = $%d", counter)
-	params = append(params, individual.ID)
+	params = append(params, id)
 
 	// Execute the query
 	res, err := db.Exec(query, params...)
 	if err == nil {
 		count, err := res.RowsAffected()
 		if err == nil {
-			if count >= 1 {
-				c.JSON(http.StatusOK, fmt.Sprintf("Updated individual: %s. ", individual.ID))
-			} else {
-				c.JSON(http.StatusNotFound, gin.H{"error": "Individual not found"})
+			if count < 1 {
+				c.JSON(http.StatusNoContent, gin.H{"@type": "Individual", "error": "Individual not found"})
 				return
 			}
 		}
@@ -309,7 +304,6 @@ func updateIndividual(c *gin.Context) {
 // deleteIndividualById deletes a individual by ID
 func deleteIndividualById(c *gin.Context) {
 	id := c.Param("id")
-
 	query := `DELETE FROM externalReference WHERE party_id = $1`
 	res, err := db.Exec(query, id)
 	if err == nil {
@@ -338,18 +332,17 @@ func deleteIndividualById(c *gin.Context) {
 			}
 		}
 	}
-	c.JSON(http.StatusNotFound, gin.H{"error": "Individual not found"})
+	c.JSON(http.StatusNoContent, gin.H{"@type": "Individual", "error": "Individual not found"})
 }
 
 // getOrganizations retrieves a organization
 func getOrganizations(c *gin.Context) {
 	var organizations []Organization
-
-	query := `SELECT par.id,COALESCE(par.href,''),COALESCE(org.type,''),COALESCE(par.type,'') AS "baseType",COALESCE(org.isLegalEntity::TEXT,''),COALESCE(org.isHeadOffice::TEXT,''),COALESCE(org.organizationType,''),COALESCE(org.name,''),COALESCE(org.tradingName,''),COALESCE(org.nameType,''),COALESCE(org.status,'')
+	query := `SELECT par.id,COALESCE(par.href,''),COALESCE(org.type,''),COALESCE(par.type,'') AS "baseType",COALESCE(org.organizationType,''),COALESCE(org.name,''),COALESCE(org.tradingName,''),COALESCE(org.nameType,''),COALESCE(org.status,'')
 		FROM party par INNER JOIN organization org ON par.id=org.party_id;`
 	rows, err := db.Query(query)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve organizations"})
+		c.JSON(http.StatusInternalServerError, gin.H{"@type": "Organization", "error": "Failed to retrieve organizations"})
 		return
 	}
 	defer rows.Close()
@@ -357,13 +350,13 @@ func getOrganizations(c *gin.Context) {
 	// Iterate over the result set and populate the slice
 	for rows.Next() {
 		var organization Organization
-		if err := rows.Scan(&organization.ID, &organization.Href, &organization.Type, &organization.BaseType, &organization.IsLegalEntity, &organization.IsHeadOffice, &organization.OrganizationType, &organization.Name, &organization.TradingName, &organization.NameType, &organization.Status); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan organization"})
+		if err := rows.Scan(&organization.ID, &organization.Href, &organization.Type, &organization.BaseType, &organization.OrganizationType, &organization.Name, &organization.TradingName, &organization.NameType, &organization.Status); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"@type": "Organization", "error": "Failed to scan organization"})
 			return
 		}
 
 		if errMsg := getExternalReference(&organization, organization.ID); errMsg != "" {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": errMsg})
+			c.JSON(http.StatusInternalServerError, gin.H{"@type": "Organization", "error": errMsg})
 			return
 		}
 
@@ -373,7 +366,7 @@ func getOrganizations(c *gin.Context) {
 
 	// Check for errors encountered during iteration
 	if err = rows.Err(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while fetching organizations"})
+		c.JSON(http.StatusInternalServerError, gin.H{"@type": "Organization", "error": "Error while fetching organizations"})
 		return
 	}
 
@@ -384,22 +377,21 @@ func getOrganizations(c *gin.Context) {
 func getOrganizationById(c *gin.Context) {
 	id := c.Param("id")
 	var organization Organization
-
-	query := `SELECT par.id,COALESCE(par.href,''),COALESCE(org.type,''),COALESCE(par.type,'') AS "baseType",COALESCE(org.isLegalEntity::TEXT,''),COALESCE(org.isHeadOffice::TEXT,''),COALESCE(org.organizationType,''),COALESCE(org.name,''),COALESCE(org.tradingName,''),COALESCE(org.nameType,''),COALESCE(org.status,'')
+	query := `SELECT par.id,COALESCE(par.href,''),COALESCE(org.type,''),COALESCE(par.type,'') AS "baseType",COALESCE(org.organizationType,''),COALESCE(org.name,''),COALESCE(org.tradingName,''),COALESCE(org.nameType,''),COALESCE(org.status,'')
 		FROM party par INNER JOIN organization org ON par.id=org.party_id WHERE par.id = $1 LIMIT 1`
 	row := db.QueryRow(query, id)
-	if err := row.Scan(&organization.ID, &organization.Href, &organization.Type, &organization.BaseType, &organization.IsLegalEntity, &organization.IsHeadOffice, &organization.OrganizationType, &organization.Name, &organization.TradingName, &organization.NameType, &organization.Status); err != nil {
+	if err := row.Scan(&organization.ID, &organization.Href, &organization.Type, &organization.BaseType, &organization.OrganizationType, &organization.Name, &organization.TradingName, &organization.NameType, &organization.Status); err != nil {
 		log.Println(err)
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Organization not found"})
+			c.JSON(http.StatusOK, gin.H{"@type": "Organization", "error": "Organization not found"})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve organization"})
+		c.JSON(http.StatusInternalServerError, gin.H{"@type": "Organization", "error": "Failed to retrieve organization"})
 		return
 	}
 
 	if errMsg := getExternalReference(&organization, organization.ID); errMsg != "" {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": errMsg})
+		c.JSON(http.StatusInternalServerError, gin.H{"@type": "Organization", "error": errMsg})
 		return
 	}
 
@@ -410,7 +402,7 @@ func getOrganizationById(c *gin.Context) {
 func createOrganization(c *gin.Context) {
 	var newOrganization Organization
 	if err := c.ShouldBindJSON(&newOrganization); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusCreated, gin.H{"@type": "Organization", "error": err.Error()})
 		return
 	}
 
@@ -422,14 +414,14 @@ func createOrganization(c *gin.Context) {
 			INSERT INTO party (id, href, type)
 			VALUES ($1, $2, 'Party') RETURNING id
 		), organizationins AS (
-			INSERT INTO organization (isLegalEntity, isHeadOffice, organizationType, name, tradingName, nameType, status, type, party_id)
-			VALUES ($3, $4, $5, $6, $7, $8, $9, 'Organization', $1) RETURNING id
+			INSERT INTO organization (organizationType, name, tradingName, nameType, status, type, party_id)
+			VALUES ($3, $4, $5, $6, $7, 'Organization', $1) RETURNING id
 		)
 		SELECT id FROM partyins;
 	`
-	err := db.QueryRow(query, newOrganization.ID, newOrganization.Href, newOrganization.IsLegalEntity, newOrganization.IsHeadOffice, newOrganization.OrganizationType, newOrganization.Name, newOrganization.TradingName, newOrganization.NameType, newOrganization.Status).Scan(&newOrganization.ID)
+	err := db.QueryRow(query, newOrganization.ID, newOrganization.Href, newOrganization.OrganizationType, newOrganization.Name, newOrganization.TradingName, newOrganization.NameType, newOrganization.Status).Scan(&newOrganization.ID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert organization " + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"@type": "Organization", "error": "Failed to insert organization " + err.Error()})
 		return
 	}
 
@@ -439,7 +431,7 @@ func createOrganization(c *gin.Context) {
 			query = `INSERT INTO externalReference (name, externalIdentifierType, type, party_id) VALUES ($1, $2, $3, $4) RETURNING id;`
 			err := db.QueryRow(query, externalReference.Name, externalReference.ExternalIdentifierType, externalReference.Type, newOrganization.ID).Scan(&id)
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert externalReference " + err.Error()})
+				c.JSON(http.StatusInternalServerError, gin.H{"@type": "Organization", "error": "Failed to insert externalReference " + err.Error()})
 				return
 			}
 		}
@@ -450,11 +442,15 @@ func createOrganization(c *gin.Context) {
 
 // updateOrganization updates a organization
 func updateOrganization(c *gin.Context) {
+	id := c.Param("id")
 	var organization Organization
 	if err := c.ShouldBindJSON(&organization); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusOK, gin.H{"@type": "Organization", "error": err.Error()})
 		return
 	}
+	fmt.Println("Request Path:", c.Request.URL.Path)
+	fmt.Println("Query Params:", c.Query("param"))
+	fmt.Println("Headers:", c.Request.Header)
 
 	query := "UPDATE organization SET " // Base query
 	var setClauses []string             // Slice to hold SET clauses
@@ -462,16 +458,6 @@ func updateOrganization(c *gin.Context) {
 	counter := 1                        // Counter for parameter placeholders ($1, $2, etc.)
 
 	// Check each field and add to the query if non-empty
-	if organization.IsLegalEntity != "" {
-		setClauses = append(setClauses, fmt.Sprintf("isLegalEntity = $%d", counter))
-		params = append(params, organization.IsLegalEntity)
-		counter++
-	}
-	if organization.IsHeadOffice != "" {
-		setClauses = append(setClauses, fmt.Sprintf("isHeadOffice = $%d", counter))
-		params = append(params, organization.IsHeadOffice)
-		counter++
-	}
 	if organization.OrganizationType != "" {
 		setClauses = append(setClauses, fmt.Sprintf("organizationType = $%d", counter))
 		params = append(params, organization.OrganizationType)
@@ -500,7 +486,7 @@ func updateOrganization(c *gin.Context) {
 
 	// If no fields to update, return an error
 	if len(setClauses) == 0 {
-		c.JSON(http.StatusNotModified, gin.H{"error": "No fields to update"})
+		c.JSON(http.StatusNotModified, gin.H{"@type": "Organization", "error": "No fields to update"})
 		return
 	}
 
@@ -509,17 +495,15 @@ func updateOrganization(c *gin.Context) {
 
 	// Add the WHERE clause
 	query += fmt.Sprintf(" WHERE party_id = $%d", counter)
-	params = append(params, organization.ID)
+	params = append(params, id)
 
 	// Execute the query
 	res, err := db.Exec(query, params...)
 	if err == nil {
 		count, err := res.RowsAffected()
 		if err == nil {
-			if count >= 1 {
-				c.JSON(http.StatusOK, fmt.Sprintf("Updated organization: %s. ", organization.ID))
-			} else {
-				c.JSON(http.StatusNotFound, gin.H{"error": "Organization not found"})
+			if count < 1 {
+				c.JSON(http.StatusNoContent, gin.H{"@type": "Organization", "error": "Organization not found"})
 				return
 			}
 		}
@@ -531,7 +515,6 @@ func updateOrganization(c *gin.Context) {
 // deleteOrganizationById deletes a organization by ID
 func deleteOrganizationById(c *gin.Context) {
 	id := c.Param("id")
-
 	query := `DELETE FROM externalReference WHERE party_id = $1`
 	res, err := db.Exec(query, id)
 	if err == nil {
@@ -560,12 +543,11 @@ func deleteOrganizationById(c *gin.Context) {
 			}
 		}
 	}
-	c.JSON(http.StatusNotFound, gin.H{"error": "Organization not found"})
+	c.JSON(http.StatusNoContent, gin.H{"@type": "Organization", "error": "Organization not found"})
 }
 
 func getExternalReference(input interface{}, party_id string) string {
 	var externalReferences []ExternalReference
-
 	query := `SELECT name, externalIdentifierType, type FROM externalReference WHERE party_id = $1`
 	rows, err := db.Query(query, party_id)
 	if err != nil {
@@ -607,16 +589,16 @@ func main() {
 	defer db.Close()
 
 	r := gin.Default()
-	r.GET("/tmf-api/party/v5/individuals", getIndividuals)
+	r.GET("/tmf-api/party/v5/individual", getIndividuals)
 	r.GET("/tmf-api/party/v5/individual/:id", getIndividualById)
 	r.POST("/tmf-api/party/v5/individual", createIndividual)
-	r.PATCH("/tmf-api/party/v5/individual", updateIndividual)
+	r.PATCH("/tmf-api/party/v5/individual/:id", updateIndividual)
 	r.DELETE("/tmf-api/party/v5/individual/:id", deleteIndividualById)
 
-	r.GET("/tmf-api/party/v5/organizations", getOrganizations)
+	r.GET("/tmf-api/party/v5/organization", getOrganizations)
 	r.GET("/tmf-api/party/v5/organization/:id", getOrganizationById)
 	r.POST("/tmf-api/party/v5/organization", createOrganization)
-	r.PATCH("/tmf-api/party/v5/organization", updateOrganization)
+	r.PATCH("/tmf-api/party/v5/organization/:id", updateOrganization)
 	r.DELETE("/tmf-api/party/v5/organization/:id", deleteOrganizationById)
 	r.Run(":8081")
 }

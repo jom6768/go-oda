@@ -8,7 +8,7 @@
 exit -- Close connection
 
 -- Connect database
-% "/Applications/Postgres.app/Contents/Versions/16/bin/psql" -U myuser -d go_oda
+"/Applications/Postgres.app/Contents/Versions/16/bin/psql" -U myuser -d go_oda
 
 SELECT current_user, session_user; -- Check user
 SET ROLE [username]; -- Change user login
@@ -75,8 +75,8 @@ SELECT id, gender, countryOfBirth, nationality, maritalStatus, birthDate, givenN
 
 CREATE TABLE organization (
     id SERIAL PRIMARY KEY,
-    isLegalEntity BOOLEAN,
-    isHeadOffice BOOLEAN,
+    -- isLegalEntity BOOLEAN,
+    -- isHeadOffice BOOLEAN,
     organizationType VARCHAR(20),
     name VARCHAR(100),
     tradingName VARCHAR(100),
@@ -88,8 +88,10 @@ CREATE TABLE organization (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO organization (isLegalEntity, isHeadOffice, organizationType, name, tradingName, nameType, status, type, party_id)
-VALUES (true, true, 'company', 'Coffee Do Brazil', 'Coffee Do Brazil Fair Trade', 'inc', 'validated', 'Individual', '128') RETURNING id;
+-- INSERT INTO organization (isLegalEntity, isHeadOffice, organizationType, name, tradingName, nameType, status, type, party_id)
+-- VALUES (true, true, 'company', 'Coffee Do Brazil', 'Coffee Do Brazil Fair Trade', 'inc', 'validated', 'Individual', '128') RETURNING id;
+INSERT INTO organization (organizationType, name, tradingName, nameType, status, type, party_id)
+VALUES ('company', 'Coffee Do Brazil', 'Coffee Do Brazil Fair Trade', 'inc', 'validated', 'Individual', '128') RETURNING id;
 
 SELECT id, isLegalEntity, isHeadOffice, organizationType, name, tradingName, nameType, status FROM organization WHERE party_id = '128';
 
@@ -109,33 +111,6 @@ INSERT INTO externalReference (name, externalIdentifierType, type, party_id) VAL
 INSERT INTO externalReference (name, externalIdentifierType, type, party_id) VALUES ('http://coffeedobrazil.com', 'internetSite', 'ExternalIdentifier', '128') RETURNING id;
 
 SELECT id, name, externalIdentifierType, type FROM externalReference WHERE party_id = '42';
-
-{
-  "id": "42",
-  "href": "https://serverRoot/tmf-api/party/v5/individual/42",
-  "@type": "Individual",
-  "@baseType": "Party",
-  "gender": "female",
-  "countryOfBirth": "United States",
-  "nationality": "American",
-  "maritalStatus": "married",
-  "birthDate": "1967-09-26T05:00:00.246Z",
-  "givenName": "Jane",
-  "preferredGivenName": "Lamborgizzia",
-  "familyName": "Lamborgizzia",
-  "legalName": "Smith",
-  "middleName": "JL",
-  "fullName": "Jane Smith ep Lamborgizzia",
-  "formattedName": "Jane Smith ep Lamborgizzia",
-  "status": "validated",
-  "externalReference": [
-    {
-      "name": "http://facebook.com/17263635",
-      "externalIdentifierType": "facebookId",
-      "@type": "ExternalIdentifier"
-    }
-  ]
-}
 
 -- Drop Table
 DROP TABLE individual;
