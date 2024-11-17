@@ -38,6 +38,7 @@ INSERT INTO party (id, href, type) VALUES ('42', 'http://localhost:8081/tmf-api/
 INSERT INTO party (id, href, type) VALUES ('43', 'http://localhost:8081/tmf-api/party/v5/individual/43', 'Party') RETURNING id;
 INSERT INTO party (id, href, type) VALUES ('44', 'http://localhost:8081/tmf-api/party/v5/individual/44', 'Party') RETURNING id;
 INSERT INTO party (id, href, type) VALUES ('128', 'http://localhost:8081/tmf-api/party/v5/individual/128', 'Party') RETURNING id;
+INSERT INTO party (id, href, type) VALUES ('131', 'http://localhost:8081/tmf-api/party/v5/individual/131', 'Party') RETURNING id;
 
 SELECT id, href, type FROM party WHERE id = '42';
 
@@ -65,7 +66,7 @@ CREATE TABLE individual (
 INSERT INTO individual (gender, countryOfBirth, nationality, maritalStatus, birthDate, givenName, preferredGivenName, familyName, legalName, middleName, fullName, formattedName, status, type, party_id)
 VALUES ('female', 'United States', 'American', 'married', '1967-09-26T05:00:00.246Z', 'Jane', 'Lamborgizzia', 'Lamborgizzia', 'Smith', 'JL', 'Jane Smith ep Lamborgizzia', 'Jane Smith ep Lamborgizzia', 'validated', 'Individual', '42') RETURNING id;
 INSERT INTO individual (gender, countryOfBirth, nationality, maritalStatus, birthDate, givenName, preferredGivenName, familyName, legalName, middleName, fullName, formattedName, status, type, party_id)
-VALUES ('male', 'Thailand', 'Thai', 'single', '1988-08-08T00:00:00.000Z', 'Jane', 'Lamborgizzia', 'Lamborgizzia', 'Smith', 'JL', 'Jane Smith ep Lamborgizzia', 'Jane Smith ep Lamborgizzia', 'active', 'Individual', '43') RETURNING id;
+VALUES ('male', 'Thailand', 'Thai', 'single', '1988-08-08T00:00:00.000Z', 'Jane', 'Lamborgizzia', 'Lamborgizzia', 'Smith', 'JL', 'Jane Smith ep Lamborgizzia', 'Jane Smith ep Lamborgizzia', 'validated', 'Individual', '43') RETURNING id;
 INSERT INTO individual (birthDate, fullName, type, party_id)
 VALUES ('1988-08-08T00:00:00.000Z', 'Jane Smith ep Lamborgizzia', 'Individual', '44') RETURNING id;
 
@@ -75,8 +76,8 @@ SELECT id, gender, countryOfBirth, nationality, maritalStatus, birthDate, givenN
 
 CREATE TABLE organization (
     id SERIAL PRIMARY KEY,
-    -- isLegalEntity BOOLEAN,
-    -- isHeadOffice BOOLEAN,
+    isLegalEntity BOOLEAN,
+    isHeadOffice BOOLEAN,
     organizationType VARCHAR(20),
     name VARCHAR(100),
     tradingName VARCHAR(100),
@@ -88,10 +89,12 @@ CREATE TABLE organization (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- INSERT INTO organization (isLegalEntity, isHeadOffice, organizationType, name, tradingName, nameType, status, type, party_id)
--- VALUES (true, true, 'company', 'Coffee Do Brazil', 'Coffee Do Brazil Fair Trade', 'inc', 'validated', 'Individual', '128') RETURNING id;
+INSERT INTO organization (isLegalEntity, isHeadOffice, organizationType, name, tradingName, nameType, status, type, party_id)
+VALUES (true, true, 'company', 'Coffee Do Brazil', 'Coffee Do Brazil Fair Trade', 'inc', 'validated', 'Organization', '128') RETURNING id;
 INSERT INTO organization (organizationType, name, tradingName, nameType, status, type, party_id)
-VALUES ('company', 'Coffee Do Brazil', 'Coffee Do Brazil Fair Trade', 'inc', 'validated', 'Individual', '128') RETURNING id;
+VALUES ('company', 'Coffee Do Brazil', 'Coffee Do Brazil Fair Trade', 'inc', 'validated', 'Organization', '129') RETURNING id;
+INSERT INTO organization (name, type, party_id)
+VALUES ('Coffee Do Brazil', 'Organization', '131') RETURNING id;
 
 SELECT id, isLegalEntity, isHeadOffice, organizationType, name, tradingName, nameType, status FROM organization WHERE party_id = '128';
 

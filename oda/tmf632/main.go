@@ -13,36 +13,38 @@ import (
 )
 
 type Individual struct {
-	ID                 string               `json:"id" binding:"required"`
-	Href               string               `json:"href,omitempty"`
-	Type               string               `json:"@type" binding:"required"`
-	BaseType           string               `json:"@baseType,omitempty"`
-	Gender             string               `json:"gender,omitempty"`
-	CountryOfBirth     string               `json:"countryOfBirth,omitempty"`
-	Nationality        string               `json:"nationality,omitempty"`
-	MaritalStatus      string               `json:"maritalStatus,omitempty"`
-	BirthDate          string               `json:"birthDate,omitempty"`
-	GivenName          string               `json:"givenName,omitempty"`
-	PreferredGivenName string               `json:"preferredGivenName,omitempty"`
-	FamilyName         string               `json:"familyName,omitempty"`
-	LegalName          string               `json:"legalName,omitempty"`
-	MiddleName         string               `json:"middleName,omitempty"`
-	FullName           string               `json:"fullName,omitempty"`
-	FormattedName      string               `json:"formattedName,omitempty"`
-	Status             string               `json:"status,omitempty"` //"initialized","validated","deceaded"
+	ID                 *string              `json:"id" binding:"required"`
+	Href               *string              `json:"href,omitempty"`
+	Type               *string              `json:"@type" binding:"required"`
+	BaseType           *string              `json:"@baseType,omitempty"`
+	Gender             *string              `json:"gender,omitempty"`
+	CountryOfBirth     *string              `json:"countryOfBirth,omitempty"`
+	Nationality        *string              `json:"nationality,omitempty"`
+	MaritalStatus      *string              `json:"maritalStatus,omitempty"`
+	BirthDate          *string              `json:"birthDate,omitempty"`
+	GivenName          *string              `json:"givenName,omitempty"`
+	PreferredGivenName *string              `json:"preferredGivenName,omitempty"`
+	FamilyName         *string              `json:"familyName,omitempty"`
+	LegalName          *string              `json:"legalName,omitempty"`
+	MiddleName         *string              `json:"middleName,omitempty"`
+	FullName           *string              `json:"fullName,omitempty"`
+	FormattedName      *string              `json:"formattedName,omitempty"`
+	Status             *string              `json:"status,omitempty"` //"initialized","validated","deceaded"
 	ExternalReferences *[]ExternalReference `json:"externalReference,omitempty"`
 }
 
 type Organization struct {
-	ID                 string               `json:"id" binding:"required"`
-	Href               string               `json:"href,omitempty"`
-	Type               string               `json:"@type" binding:"required"`
-	BaseType           string               `json:"@baseType,omitempty"`
-	OrganizationType   string               `json:"organizationType,omitempty"`
-	Name               string               `json:"name,omitempty"`
-	TradingName        string               `json:"tradingName,omitempty"`
-	NameType           string               `json:"nameType,omitempty"`
-	Status             string               `json:"status,omitempty"` //"initialized","validated","closed"
+	ID                 *string              `json:"id" binding:"required"`
+	Href               *string              `json:"href,omitempty"`
+	Type               *string              `json:"@type" binding:"required"`
+	BaseType           *string              `json:"@baseType,omitempty"`
+	IsLegalEntity      *bool                `json:"isLegalEntity,omitempty"`
+	IsHeadOffice       *bool                `json:"isHeadOffice,omitempty"`
+	OrganizationType   *string              `json:"organizationType,omitempty"`
+	Name               *string              `json:"name,omitempty"`
+	TradingName        *string              `json:"tradingName,omitempty"`
+	NameType           *string              `json:"nameType,omitempty"`
+	Status             *string              `json:"status,omitempty"` //"initialized","validated","closed"
 	ExternalReferences *[]ExternalReference `json:"externalReference,omitempty"`
 }
 
@@ -74,10 +76,10 @@ func initDB() {
 	}
 }
 
-// getIndividuals retrieves a individual
-func getIndividuals(c *gin.Context) {
+// listIndividual retrieves a individual
+func listIndividual(c *gin.Context) {
 	var individuals []Individual
-	query := `SELECT par.id,COALESCE(par.href,''),COALESCE(ind.type,''),COALESCE(par.type,'') AS "baseType",COALESCE(ind.gender,''),COALESCE(ind.countryOfBirth,''),COALESCE(ind.nationality,''),COALESCE(ind.maritalStatus,''),COALESCE(ind.birthDate::TEXT,''),COALESCE(ind.givenName,''),COALESCE(ind.preferredGivenName,''),COALESCE(ind.familyName,''),COALESCE(ind.legalName,''),COALESCE(ind.middleName,''),ind.fullName,COALESCE(ind.formattedName,''),COALESCE(ind.status,'')
+	query := `SELECT par.id,par.href,ind.type,par.type AS "baseType",ind.gender,ind.countryOfBirth,ind.nationality,ind.maritalStatus,ind.birthDate,ind.givenName,ind.preferredGivenName,ind.familyName,ind.legalName,ind.middleName,ind.fullName,ind.formattedName,ind.status
 		FROM party par INNER JOIN individual ind ON par.id=ind.party_id;`
 	rows, err := db.Query(query)
 	if err != nil {
@@ -94,7 +96,7 @@ func getIndividuals(c *gin.Context) {
 			return
 		}
 
-		if errMsg := getExternalReference(&individual, individual.ID); errMsg != "" {
+		if errMsg := getExternalReference(&individual, *individual.ID); errMsg != "" {
 			c.JSON(http.StatusInternalServerError, gin.H{"@type": "Individual", "error": errMsg})
 			return
 		}
@@ -116,20 +118,20 @@ func getIndividuals(c *gin.Context) {
 func getIndividualById(c *gin.Context) {
 	id := c.Param("id")
 	var individual Individual
-	query := `SELECT par.id,COALESCE(par.href,''),COALESCE(ind.type,''),COALESCE(par.type,'') AS "baseType",COALESCE(ind.gender,''),COALESCE(ind.countryOfBirth,''),COALESCE(ind.nationality,''),COALESCE(ind.maritalStatus,''),COALESCE(ind.birthDate::TEXT,''),COALESCE(ind.givenName,''),COALESCE(ind.preferredGivenName,''),COALESCE(ind.familyName,''),COALESCE(ind.legalName,''),COALESCE(ind.middleName,''),ind.fullName,COALESCE(ind.formattedName,''),COALESCE(ind.status,'')
+	query := `SELECT par.id,par.href,ind.type,par.type AS "baseType",ind.gender,ind.countryOfBirth,ind.nationality,ind.maritalStatus,ind.birthDate,ind.givenName,ind.preferredGivenName,ind.familyName,ind.legalName,ind.middleName,ind.fullName,ind.formattedName,ind.status
 		FROM party par INNER JOIN individual ind ON par.id=ind.party_id WHERE par.id = $1 LIMIT 1`
 	row := db.QueryRow(query, id)
+	log.Println(*row)
 	if err := row.Scan(&individual.ID, &individual.Href, &individual.Type, &individual.BaseType, &individual.Gender, &individual.CountryOfBirth, &individual.Nationality, &individual.MaritalStatus, &individual.BirthDate, &individual.GivenName, &individual.PreferredGivenName, &individual.FamilyName, &individual.LegalName, &individual.MiddleName, &individual.FullName, &individual.FormattedName, &individual.Status); err != nil {
-		log.Println(err)
 		if err == sql.ErrNoRows {
 			c.JSON(http.StatusOK, gin.H{"@type": "Individual", "error": "Individual not found"})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"@type": "Individual", "error": "Failed to retrieve individual"})
+		c.JSON(http.StatusInternalServerError, gin.H{"@type": "Individual", "error": "Failed to scan individual" + err.Error()})
 		return
 	}
 
-	if errMsg := getExternalReference(&individual, individual.ID); errMsg != "" {
+	if errMsg := getExternalReference(&individual, *individual.ID); errMsg != "" {
 		c.JSON(http.StatusInternalServerError, gin.H{"@type": "Individual", "error": errMsg})
 		return
 	}
@@ -146,12 +148,12 @@ func createIndividual(c *gin.Context) {
 	}
 
 	//Href
-	newIndividual.Href = "http://localhost:8081/tmf-api/party/v5/individual/" + newIndividual.ID
+	href := "http://localhost:8081/tmf-api/party/v5/individual/" + *newIndividual.ID
 	//Birthdate
 	birthDate := sql.NullTime{Valid: false}
-	if newIndividual.BirthDate != "" {
+	if newIndividual.BirthDate != nil {
 		// Parse the timestamp string into time.Time
-		parsedTime, err := time.Parse(time.RFC3339, newIndividual.BirthDate)
+		parsedTime, err := time.Parse(time.RFC3339, *newIndividual.BirthDate)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"@type": "Individual", "error": "Failed to parsing timestamp " + err.Error()})
 			return
@@ -163,15 +165,13 @@ func createIndividual(c *gin.Context) {
 
 	query := `
 		WITH partyins AS (
-			INSERT INTO party (id, href, type)
-			VALUES ($1, $2, 'Party') RETURNING id
+			INSERT INTO party (id,href,type) VALUES ($1,$2,'Party') RETURNING id
 		), individualins AS (
-			INSERT INTO individual (gender, countryOfBirth, nationality, maritalStatus, birthDate, givenName, preferredGivenName, familyName, legalName, middleName, fullName, formattedName, status, type, party_id)
-			VALUES ($3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, 'Invididual', $1) RETURNING id
+			INSERT INTO individual (gender,countryOfBirth,nationality,maritalStatus,birthDate,givenName,preferredGivenName,familyName,legalName,middleName,fullName,formattedName,status,type,party_id) VALUES ($3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,'Invididual',$1) RETURNING id
 		)
 		SELECT id FROM partyins;
 	`
-	err := db.QueryRow(query, newIndividual.ID, newIndividual.Href, newIndividual.Gender, newIndividual.CountryOfBirth, newIndividual.Nationality, newIndividual.MaritalStatus, birthDate, newIndividual.GivenName, newIndividual.PreferredGivenName, newIndividual.FamilyName, newIndividual.LegalName, newIndividual.MiddleName, newIndividual.FullName, newIndividual.FormattedName, newIndividual.Status).Scan(&newIndividual.ID)
+	err := db.QueryRow(query, newIndividual.ID, href, newIndividual.Gender, newIndividual.CountryOfBirth, newIndividual.Nationality, newIndividual.MaritalStatus, birthDate, newIndividual.GivenName, newIndividual.PreferredGivenName, newIndividual.FamilyName, newIndividual.LegalName, newIndividual.MiddleName, newIndividual.FullName, newIndividual.FormattedName, newIndividual.Status).Scan(&newIndividual.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"@type": "Individual", "error": "Failed to insert individual " + err.Error()})
 		return
@@ -180,7 +180,7 @@ func createIndividual(c *gin.Context) {
 	if newIndividual.ExternalReferences != nil {
 		for _, externalReference := range *newIndividual.ExternalReferences {
 			var id int
-			query = `INSERT INTO externalReference (name, externalIdentifierType, type, party_id) VALUES ($1, $2, $3, $4) RETURNING id;`
+			query = `INSERT INTO externalReference (name,externalIdentifierType,type,party_id) VALUES ($1,$2,$3,$4) RETURNING id;`
 			err := db.QueryRow(query, externalReference.Name, externalReference.ExternalIdentifierType, externalReference.Type, newIndividual.ID).Scan(&id)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"@type": "Individual", "error": "Failed to insert externalReference " + err.Error()})
@@ -207,67 +207,67 @@ func updateIndividual(c *gin.Context) {
 	counter := 1                      // Counter for parameter placeholders ($1, $2, etc.)
 
 	// Check each field and add to the query if non-empty
-	if individual.Gender != "" {
+	if individual.Gender != nil {
 		setClauses = append(setClauses, fmt.Sprintf("gender = $%d", counter))
 		params = append(params, individual.Gender)
 		counter++
 	}
-	if individual.CountryOfBirth != "" {
+	if individual.CountryOfBirth != nil {
 		setClauses = append(setClauses, fmt.Sprintf("countryOfBirth = $%d", counter))
 		params = append(params, individual.CountryOfBirth)
 		counter++
 	}
-	if individual.Nationality != "" {
+	if individual.Nationality != nil {
 		setClauses = append(setClauses, fmt.Sprintf("nationality = $%d", counter))
 		params = append(params, individual.Nationality)
 		counter++
 	}
-	if individual.MaritalStatus != "" {
+	if individual.MaritalStatus != nil {
 		setClauses = append(setClauses, fmt.Sprintf("maritalStatus = $%d", counter))
 		params = append(params, individual.MaritalStatus)
 		counter++
 	}
-	if individual.BirthDate != "" {
+	if individual.BirthDate != nil {
 		setClauses = append(setClauses, fmt.Sprintf("birthDate = $%d", counter))
 		params = append(params, individual.BirthDate)
 		counter++
 	}
-	if individual.GivenName != "" {
+	if individual.GivenName != nil {
 		setClauses = append(setClauses, fmt.Sprintf("givenName = $%d", counter))
 		params = append(params, individual.GivenName)
 		counter++
 	}
-	if individual.PreferredGivenName != "" {
+	if individual.PreferredGivenName != nil {
 		setClauses = append(setClauses, fmt.Sprintf("preferredGivenName = $%d", counter))
 		params = append(params, individual.PreferredGivenName)
 		counter++
 	}
-	if individual.FamilyName != "" {
+	if individual.FamilyName != nil {
 		setClauses = append(setClauses, fmt.Sprintf("familyName = $%d", counter))
 		params = append(params, individual.FamilyName)
 		counter++
 	}
-	if individual.LegalName != "" {
+	if individual.LegalName != nil {
 		setClauses = append(setClauses, fmt.Sprintf("legalName = $%d", counter))
 		params = append(params, individual.LegalName)
 		counter++
 	}
-	if individual.MiddleName != "" {
+	if individual.MiddleName != nil {
 		setClauses = append(setClauses, fmt.Sprintf("middleName = $%d", counter))
 		params = append(params, individual.MiddleName)
 		counter++
 	}
-	if individual.FullName != "" {
+	if individual.FullName != nil {
 		setClauses = append(setClauses, fmt.Sprintf("fullName = $%d", counter))
 		params = append(params, individual.FullName)
 		counter++
 	}
-	if individual.FormattedName != "" {
+	if individual.FormattedName != nil {
 		setClauses = append(setClauses, fmt.Sprintf("formattedName = $%d", counter))
 		params = append(params, individual.FormattedName)
 		counter++
 	}
-	if individual.Status != "" {
+	if individual.Status != nil {
 		setClauses = append(setClauses, fmt.Sprintf("status = $%d", counter))
 		params = append(params, individual.Status)
 		counter++
@@ -335,10 +335,10 @@ func deleteIndividualById(c *gin.Context) {
 	c.JSON(http.StatusNoContent, gin.H{"@type": "Individual", "error": "Individual not found"})
 }
 
-// getOrganizations retrieves a organization
-func getOrganizations(c *gin.Context) {
+// listOrganization retrieves a organization
+func listOrganization(c *gin.Context) {
 	var organizations []Organization
-	query := `SELECT par.id,COALESCE(par.href,''),COALESCE(org.type,''),COALESCE(par.type,'') AS "baseType",COALESCE(org.organizationType,''),COALESCE(org.name,''),COALESCE(org.tradingName,''),COALESCE(org.nameType,''),COALESCE(org.status,'')
+	query := `SELECT par.id,par.href,org.type,par.type AS "baseType",org.isLegalEntity,org.isHeadOffice,org.organizationType,org.name,org.tradingName,org.nameType,org.status
 		FROM party par INNER JOIN organization org ON par.id=org.party_id;`
 	rows, err := db.Query(query)
 	if err != nil {
@@ -350,12 +350,12 @@ func getOrganizations(c *gin.Context) {
 	// Iterate over the result set and populate the slice
 	for rows.Next() {
 		var organization Organization
-		if err := rows.Scan(&organization.ID, &organization.Href, &organization.Type, &organization.BaseType, &organization.OrganizationType, &organization.Name, &organization.TradingName, &organization.NameType, &organization.Status); err != nil {
+		if err := rows.Scan(&organization.ID, &organization.Href, &organization.Type, &organization.BaseType, &organization.IsLegalEntity, &organization.IsHeadOffice, &organization.OrganizationType, &organization.Name, &organization.TradingName, &organization.NameType, &organization.Status); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"@type": "Organization", "error": "Failed to scan organization"})
 			return
 		}
 
-		if errMsg := getExternalReference(&organization, organization.ID); errMsg != "" {
+		if errMsg := getExternalReference(&organization, *organization.ID); errMsg != "" {
 			c.JSON(http.StatusInternalServerError, gin.H{"@type": "Organization", "error": errMsg})
 			return
 		}
@@ -377,20 +377,19 @@ func getOrganizations(c *gin.Context) {
 func getOrganizationById(c *gin.Context) {
 	id := c.Param("id")
 	var organization Organization
-	query := `SELECT par.id,COALESCE(par.href,''),COALESCE(org.type,''),COALESCE(par.type,'') AS "baseType",COALESCE(org.organizationType,''),COALESCE(org.name,''),COALESCE(org.tradingName,''),COALESCE(org.nameType,''),COALESCE(org.status,'')
+	query := `SELECT par.id,par.href,org.type,par.type AS "baseType",org.isLegalEntity,org.isHeadOffice,org.organizationType,org.name,org.tradingName,org.nameType,org.status
 		FROM party par INNER JOIN organization org ON par.id=org.party_id WHERE par.id = $1 LIMIT 1`
 	row := db.QueryRow(query, id)
-	if err := row.Scan(&organization.ID, &organization.Href, &organization.Type, &organization.BaseType, &organization.OrganizationType, &organization.Name, &organization.TradingName, &organization.NameType, &organization.Status); err != nil {
-		log.Println(err)
+	if err := row.Scan(&organization.ID, &organization.Href, &organization.Type, &organization.BaseType, &organization.IsLegalEntity, &organization.IsHeadOffice, &organization.OrganizationType, &organization.Name, &organization.TradingName, &organization.NameType, &organization.Status); err != nil {
 		if err == sql.ErrNoRows {
 			c.JSON(http.StatusOK, gin.H{"@type": "Organization", "error": "Organization not found"})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"@type": "Organization", "error": "Failed to retrieve organization"})
+		c.JSON(http.StatusInternalServerError, gin.H{"@type": "Organization", "error": "Failed to scan organization"})
 		return
 	}
 
-	if errMsg := getExternalReference(&organization, organization.ID); errMsg != "" {
+	if errMsg := getExternalReference(&organization, *organization.ID); errMsg != "" {
 		c.JSON(http.StatusInternalServerError, gin.H{"@type": "Organization", "error": errMsg})
 		return
 	}
@@ -407,19 +406,17 @@ func createOrganization(c *gin.Context) {
 	}
 
 	//Href
-	newOrganization.Href = "http://localhost:8081/tmf-api/party/v5/organization/" + newOrganization.ID
+	href := "http://localhost:8081/tmf-api/party/v5/organization/" + *newOrganization.ID
 
 	query := `
 		WITH partyins AS (
-			INSERT INTO party (id, href, type)
-			VALUES ($1, $2, 'Party') RETURNING id
+			INSERT INTO party (id,href,type) VALUES ($1,$2,'Party') RETURNING id
 		), organizationins AS (
-			INSERT INTO organization (organizationType, name, tradingName, nameType, status, type, party_id)
-			VALUES ($3, $4, $5, $6, $7, 'Organization', $1) RETURNING id
+			INSERT INTO organization (isLegalEntity,isHeadOffice,organizationType,name,tradingName,nameType,status,type,party_id) VALUES ($3,$4,$5,$6,$7,$8,$9,'Organization',$1) RETURNING id
 		)
 		SELECT id FROM partyins;
 	`
-	err := db.QueryRow(query, newOrganization.ID, newOrganization.Href, newOrganization.OrganizationType, newOrganization.Name, newOrganization.TradingName, newOrganization.NameType, newOrganization.Status).Scan(&newOrganization.ID)
+	err := db.QueryRow(query, newOrganization.ID, href, newOrganization.IsLegalEntity, newOrganization.IsHeadOffice, newOrganization.OrganizationType, newOrganization.Name, newOrganization.TradingName, newOrganization.NameType, newOrganization.Status).Scan(&newOrganization.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"@type": "Organization", "error": "Failed to insert organization " + err.Error()})
 		return
@@ -428,7 +425,7 @@ func createOrganization(c *gin.Context) {
 	if newOrganization.ExternalReferences != nil {
 		for _, externalReference := range *newOrganization.ExternalReferences {
 			var id int
-			query = `INSERT INTO externalReference (name, externalIdentifierType, type, party_id) VALUES ($1, $2, $3, $4) RETURNING id;`
+			query = `INSERT INTO externalReference (name,externalIdentifierType,type,party_id) VALUES ($1,$2,$3,$4) RETURNING id;`
 			err := db.QueryRow(query, externalReference.Name, externalReference.ExternalIdentifierType, externalReference.Type, newOrganization.ID).Scan(&id)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"@type": "Organization", "error": "Failed to insert externalReference " + err.Error()})
@@ -448,37 +445,43 @@ func updateOrganization(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"@type": "Organization", "error": err.Error()})
 		return
 	}
-	fmt.Println("Request Path:", c.Request.URL.Path)
-	fmt.Println("Query Params:", c.Query("param"))
-	fmt.Println("Headers:", c.Request.Header)
-
 	query := "UPDATE organization SET " // Base query
 	var setClauses []string             // Slice to hold SET clauses
 	var params []interface{}            // Slice to hold query parameters
 	counter := 1                        // Counter for parameter placeholders ($1, $2, etc.)
 
 	// Check each field and add to the query if non-empty
-	if organization.OrganizationType != "" {
+	if organization.IsLegalEntity != nil {
+		setClauses = append(setClauses, fmt.Sprintf("isLegalEntity = $%d", counter))
+		params = append(params, *organization.IsLegalEntity)
+		counter++
+	}
+	if organization.IsHeadOffice != nil {
+		setClauses = append(setClauses, fmt.Sprintf("isHeadOffice = $%d", counter))
+		params = append(params, *organization.IsHeadOffice)
+		counter++
+	}
+	if organization.OrganizationType != nil {
 		setClauses = append(setClauses, fmt.Sprintf("organizationType = $%d", counter))
 		params = append(params, organization.OrganizationType)
 		counter++
 	}
-	if organization.Name != "" {
+	if organization.Name != nil {
 		setClauses = append(setClauses, fmt.Sprintf("name = $%d", counter))
 		params = append(params, organization.Name)
 		counter++
 	}
-	if organization.TradingName != "" {
+	if organization.TradingName != nil {
 		setClauses = append(setClauses, fmt.Sprintf("tradingName = $%d", counter))
 		params = append(params, organization.TradingName)
 		counter++
 	}
-	if organization.NameType != "" {
+	if organization.NameType != nil {
 		setClauses = append(setClauses, fmt.Sprintf("nameType = $%d", counter))
 		params = append(params, organization.NameType)
 		counter++
 	}
-	if organization.Status != "" {
+	if organization.Status != nil {
 		setClauses = append(setClauses, fmt.Sprintf("status = $%d", counter))
 		params = append(params, organization.Status)
 		counter++
@@ -589,13 +592,13 @@ func main() {
 	defer db.Close()
 
 	r := gin.Default()
-	r.GET("/tmf-api/party/v5/individual", getIndividuals)
+	r.GET("/tmf-api/party/v5/individual", listIndividual)
 	r.GET("/tmf-api/party/v5/individual/:id", getIndividualById)
 	r.POST("/tmf-api/party/v5/individual", createIndividual)
 	r.PATCH("/tmf-api/party/v5/individual/:id", updateIndividual)
 	r.DELETE("/tmf-api/party/v5/individual/:id", deleteIndividualById)
 
-	r.GET("/tmf-api/party/v5/organization", getOrganizations)
+	r.GET("/tmf-api/party/v5/organization", listOrganization)
 	r.GET("/tmf-api/party/v5/organization/:id", getOrganizationById)
 	r.POST("/tmf-api/party/v5/organization", createOrganization)
 	r.PATCH("/tmf-api/party/v5/organization/:id", updateOrganization)
