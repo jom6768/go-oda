@@ -148,7 +148,7 @@ func createIndividual(c *gin.Context) {
 	}
 
 	//Href
-	href := "http://localhost:8081/tmf-api/party/v5/individual/" + *newIndividual.ID
+	href := "http://localhost:8081/tmf-api/partyManagement/v5/individual/" + *newIndividual.ID
 	//Birthdate
 	birthDate := sql.NullTime{Valid: false}
 	if newIndividual.BirthDate != nil {
@@ -406,7 +406,7 @@ func createOrganization(c *gin.Context) {
 	}
 
 	//Href
-	href := "http://localhost:8081/tmf-api/party/v5/organization/" + *newOrganization.ID
+	href := "http://localhost:8081/tmf-api/partyManagement/v5/organization/" + *newOrganization.ID
 
 	query := `
 		WITH partyins AS (
