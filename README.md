@@ -102,3 +102,29 @@ $ echo $! > tmf632.pid
 ```
 
 *** This will run both TMF629 on port 8629 and TMF632 on port 8632 ***
+ 
+
+## Testing
+
+#### [Try to call webservice](oda/config)
+
+A sample request is in go-oda/oda/config/sample_request.txt
+ 
+
+#### [Run TMForum CTK Test Kit](https://www.tmforum.org/oda/open-apis/directory)
+
+You can download CTK Test Kit from TMForum website and test.
+* [TMF629](https://www.tmforum.org/oda/open-apis/directory/customer-management-api-TMF629/v5.0)
+* [TMF632](https://www.tmforum.org/oda/open-apis/directory/party-management-api-TMF632/v5.0)
+ 
+
+## Reference
+
+* [Go](https://go.dev)
+* [PostgreSQL](https://www.postgresql.org)
+* [Docker](https://www.docker.com)
+* [Minikube](https://minikube.sigs.k8s.io)
+
+You can check Go learning in my youtube channel: [PJ Sweet Home](https://www.youtube.com/@PJSweetHome)
+
+[![Go - A Tour of Go (Completed version with answer of all examples) [English & Thai Subtitle]](https://img.youtube.com/vi/Drrm470ta_Q/0.jpg)](https://www.youtube.com/watch?v=Drrm470ta_Q)
