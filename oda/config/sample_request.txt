@@ -1,35 +1,35 @@
-curl -X GET http://localhost:8081/tmf-api/partyManagement/v5/individual
+curl -X GET http://localhost:8632/tmf-api/partyManagement/v5/individual
 
-curl -X GET http://localhost:8081/tmf-api/partyManagement/v5/individual/42
+curl -X GET http://localhost:8632/tmf-api/partyManagement/v5/individual/42
 
-curl -X POST http://localhost:8081/tmf-api/partyManagement/v5/individual -d '{"id": "42","@type": "Individual","@baseType": "Party","gender": "female","countryOfBirth": "United States","nationality": "American","maritalStatus": "married","givenName": "Jane","preferredGivenName": "Lamborgizzia","familyName": "Lamborgizzia","legalName": "Smith","middleName": "JL","fullName": "Jane Smith ep Lamborgizzia","formattedName": "Jane Smith ep Lamborgizzia","status": "validated"}' -H "Content-Type: application/json"
-curl -X POST http://localhost:8081/tmf-api/partyManagement/v5/individual -d '{"id": "43","@type": "Individual","gender": "female","countryOfBirth": "United States","nationality": "American","maritalStatus": "married","birthDate": "1967-09-26T05:00:00.246Z","givenName": "Jane","preferredGivenName": "Lamborgizzia","familyName": "Lamborgizzia","legalName": "Smith","middleName": "JL","fullName": "Jane Smith ep Lamborgizzia","formattedName": "Jane Smith ep Lamborgizzia","status": "validated"}' -H "Content-Type: application/json"
-curl -X POST http://localhost:8081/tmf-api/partyManagement/v5/individual -d '{"id": "44","@type": "Individual","birthDate": "1967-09-26T05:00:00.246Z","fullName": "Jane Smith ep Lamborgizzia"}' -H "Content-Type: application/json"
-curl -X POST http://localhost:8081/tmf-api/partyManagement/v5/individual -d '{"id": "46","@type": "Individual","fullName": "Jane Smith ep Lamborgizzia","externalReference": [{"name": "http://facebook.com/17263639","externalIdentifierType": "facebookId","@type": "ExternalIdentifier"},{"name": "http://google.com/17263639","externalIdentifierType": "googleId","@type": "ExternalIdentifier"}]}' -H "Content-Type: application/json"
+curl -X POST http://localhost:8632/tmf-api/partyManagement/v5/individual -d '{"id": "42","@type": "Individual","@baseType": "Party","gender": "female","countryOfBirth": "United States","nationality": "American","maritalStatus": "married","givenName": "Jane","preferredGivenName": "Lamborgizzia","familyName": "Lamborgizzia","legalName": "Smith","middleName": "JL","fullName": "Jane Smith ep Lamborgizzia","formattedName": "Jane Smith ep Lamborgizzia","status": "validated"}' -H "Content-Type: application/json"
+curl -X POST http://localhost:8632/tmf-api/partyManagement/v5/individual -d '{"id": "43","@type": "Individual","gender": "female","countryOfBirth": "United States","nationality": "American","maritalStatus": "married","birthDate": "1967-09-26T05:00:00.246Z","givenName": "Jane","preferredGivenName": "Lamborgizzia","familyName": "Lamborgizzia","legalName": "Smith","middleName": "JL","fullName": "Jane Smith ep Lamborgizzia","formattedName": "Jane Smith ep Lamborgizzia","status": "validated"}' -H "Content-Type: application/json"
+curl -X POST http://localhost:8632/tmf-api/partyManagement/v5/individual -d '{"id": "44","@type": "Individual","birthDate": "1967-09-26T05:00:00.246Z","fullName": "Jane Smith ep Lamborgizzia"}' -H "Content-Type: application/json"
+curl -X POST http://localhost:8632/tmf-api/partyManagement/v5/individual -d '{"id": "46","@type": "Individual","fullName": "Jane Smith ep Lamborgizzia","externalReference": [{"name": "http://facebook.com/17263639","externalIdentifierType": "facebookId","@type": "ExternalIdentifier"},{"name": "http://google.com/17263639","externalIdentifierType": "googleId","@type": "ExternalIdentifier"}]}' -H "Content-Type: application/json"
 
-curl -X PATCH http://localhost:8081/tmf-api/partyManagement/v5/individual -d '{"id": "46","@type": "Individual","gender": "male","status": "validated"}' -H "Content-Type: application/json"
+curl -X PATCH http://localhost:8632/tmf-api/partyManagement/v5/individual -d '{"id": "46","@type": "Individual","gender": "male","status": "validated"}' -H "Content-Type: application/json"
 
-curl -X DELETE http://localhost:8081/tmf-api/partyManagement/v5/individual/46
-
-
-curl -X GET http://localhost:8081/tmf-api/partyManagement/v5/organization
-
-curl -X GET http://localhost:8081/tmf-api/partyManagement/v5/organization/128
-
-curl -X POST http://localhost:8081/tmf-api/partyManagement/v5/organization -d '{"id": "129","@type": "Organization","isLegalEntity": false,"isHeadOffice": true,"organizationType": "company","name": "Tea","tradingName": "Tea One","nameType": "inc","status": "validated","externalReference":[{"name": "http://teaone.com","externalIdentifierType": "internetSite","@type": "ExternalIdentifier"},{"name": "http://facebook.com/teaone","externalIdentifierType": "facebookId","@type": "ExternalIdentifier"}]}' -H "Content-Type: application/json"
-curl -X POST http://localhost:8081/tmf-api/partyManagement/v5/organization -d '{"id": "130","@type": "Organization","name": "TeaOne","externalReference":[{"name": "http://teaone.com","externalIdentifierType": "internetSite","@type": "ExternalIdentifier"},{"name": "http://facebook.com/teaone","externalIdentifierType": "facebookId","@type": "ExternalIdentifier"}]}' -H "Content-Type: application/json"
-
-curl -X PATCH http://localhost:8081/tmf-api/partyManagement/v5/organization -d '{"id": "130","@type": "Organization","isHeadOffice": true,"tradingName": "TeaTwo","status": "validated"}' -H "Content-Type: application/json"
-
-curl -X DELETE http://localhost:8081/tmf-api/partyManagement/v5/organization/129
+curl -X DELETE http://localhost:8632/tmf-api/partyManagement/v5/individual/46
 
 
-curl -X GET http://localhost:8081/tmf-api/customerManagement/v5/customer
+curl -X GET http://localhost:8632/tmf-api/partyManagement/v5/organization
 
-curl -X GET http://localhost:8081/tmf-api/customerManagement/v5/customer/1141
+curl -X GET http://localhost:8632/tmf-api/partyManagement/v5/organization/128
 
-curl -X POST http://localhost:8081/tmf-api/customerManagement/v5/customer -d '{"id": "1141","@type": "Customer","name": "Sun Football Club","role": "Seller","contactMedium": [{"@type": "GeographicAddressContactMedium","contactType": "homeAddress","validFor": {"startDateTime": "2024-01-01T00:00:00Z"},"city": "Nonthaburi","country": "Thailand","postCode": "11120","street1": "Ratchaphruek"}]}' -H "Content-Type: application/json"
+curl -X POST http://localhost:8632/tmf-api/partyManagement/v5/organization -d '{"id": "129","@type": "Organization","isLegalEntity": false,"isHeadOffice": true,"organizationType": "company","name": "Tea","tradingName": "Tea One","nameType": "inc","status": "validated","externalReference":[{"name": "http://teaone.com","externalIdentifierType": "internetSite","@type": "ExternalIdentifier"},{"name": "http://facebook.com/teaone","externalIdentifierType": "facebookId","@type": "ExternalIdentifier"}]}' -H "Content-Type: application/json"
+curl -X POST http://localhost:8632/tmf-api/partyManagement/v5/organization -d '{"id": "130","@type": "Organization","name": "TeaOne","externalReference":[{"name": "http://teaone.com","externalIdentifierType": "internetSite","@type": "ExternalIdentifier"},{"name": "http://facebook.com/teaone","externalIdentifierType": "facebookId","@type": "ExternalIdentifier"}]}' -H "Content-Type: application/json"
 
-curl -X PATCH http://localhost:8081/tmf-api/customerManagement/v5/customer -d '{"id": "1141","@type": "Customer","status": "Approved","statusReason": "Verified"}' -H "Content-Type: application/json"
+curl -X PATCH http://localhost:8632/tmf-api/partyManagement/v5/organization -d '{"id": "130","@type": "Organization","isHeadOffice": true,"tradingName": "TeaTwo","status": "validated"}' -H "Content-Type: application/json"
 
-curl -X DELETE http://localhost:8081/tmf-api/customerManagement/v5/customer/1141
+curl -X DELETE http://localhost:8632/tmf-api/partyManagement/v5/organization/129
+
+
+curl -X GET http://localhost:8629/tmf-api/customerManagement/v5/customer
+
+curl -X GET http://localhost:8629/tmf-api/customerManagement/v5/customer/1141
+
+curl -X POST http://localhost:8629/tmf-api/customerManagement/v5/customer -d '{"id": "1141","@type": "Customer","name": "Sun Football Club","role": "Seller","contactMedium": [{"@type": "GeographicAddressContactMedium","contactType": "homeAddress","validFor": {"startDateTime": "2024-01-01T00:00:00Z"},"city": "Nonthaburi","country": "Thailand","postCode": "11120","street1": "Ratchaphruek"}]}' -H "Content-Type: application/json"
+
+curl -X PATCH http://localhost:8629/tmf-api/customerManagement/v5/customer -d '{"id": "1141","@type": "Customer","status": "Approved","statusReason": "Verified"}' -H "Content-Type: application/json"
+
+curl -X DELETE http://localhost:8629/tmf-api/customerManagement/v5/customer/1141

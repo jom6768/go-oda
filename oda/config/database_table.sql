@@ -68,7 +68,7 @@ CREATE TABLE partyRole (
 );
 
 INSERT INTO partyRole (id,href,name,description,role,status,statusReason,startDateTime,endDateTime,type)
-VALUES ('1140','http://localhost:8081/tmf-api/customerManagement/v5/customer/1140','Moon Football Club','Testing','Buyer','Approved','Account details checked','2018-06-12T00:00:00Z','2019-01-01T00:00:00Z','PartyRole') RETURNING id;
+VALUES ('1140','http://localhost:8629/tmf-api/customerManagement/v5/customer/1140','Moon Football Club','Testing','Buyer','Approved','Account details checked','2018-06-12T00:00:00Z','2019-01-01T00:00:00Z','PartyRole') RETURNING id;
 
 UPDATE partyRole SET description = '',role = '' WHERE partyRole_id = '1140';
 
@@ -156,11 +156,11 @@ CREATE TABLE party (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO party (id,href,type) VALUES ('42','http://localhost:8081/tmf-api/party/v5/individual/42','Party') RETURNING id;
-INSERT INTO party (id,href,type) VALUES ('43','http://localhost:8081/tmf-api/party/v5/individual/43','Party') RETURNING id;
-INSERT INTO party (id,href,type) VALUES ('44','http://localhost:8081/tmf-api/party/v5/individual/44','Party') RETURNING id;
-INSERT INTO party (id,href,type) VALUES ('128','http://localhost:8081/tmf-api/party/v5/individual/128','Party') RETURNING id;
-INSERT INTO party (id,href,type) VALUES ('129','http://localhost:8081/tmf-api/party/v5/individual/129','Party') RETURNING id;
+INSERT INTO party (id,href,type) VALUES ('42','http://localhost:8632/tmf-api/partyManagement/v5/individual/42','Party') RETURNING id;
+INSERT INTO party (id,href,type) VALUES ('43','http://localhost:8632/tmf-api/partyManagement/v5/individual/43','Party') RETURNING id;
+INSERT INTO party (id,href,type) VALUES ('44','http://localhost:8632/tmf-api/partyManagement/v5/individual/44','Party') RETURNING id;
+INSERT INTO party (id,href,type) VALUES ('128','http://localhost:8632/tmf-api/partyManagement/v5/individual/128','Party') RETURNING id;
+INSERT INTO party (id,href,type) VALUES ('129','http://localhost:8632/tmf-api/partyManagement/v5/individual/129','Party') RETURNING id;
 
 SELECT id,href,type FROM party WHERE id = '42';
 
