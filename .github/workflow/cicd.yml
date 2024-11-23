@@ -28,8 +28,8 @@ jobs:
       # Build Docker images
       - name: Build Docker Image
         run: |
-          docker build . --no-cache -t jom6768/go-oda-tmf629 -f Dockerfile
-          docker build . --no-cache -t jom6768/go-oda-tmf632 -f Dockerfile
+          docker build . --no-cache -t jom6768/go-oda-tmf629 -f ./oda/tmf629/Dockerfile
+          docker build . --no-cache -t jom6768/go-oda-tmf632 -f ./oda/tmf632/Dockerfile
 
       # Push Docker images
       - name: Push Docker Image
@@ -56,8 +56,8 @@ jobs:
       run: |
         kubectl apply -f k8s/deployment-tmf629.yaml
         kubectl apply -f k8s/deployment-tmf632.yaml
-        kubectl wait --for=condition=available svc/tmf629 --timeout=60s
-        kubectl wait --for=condition=available svc/tmf632 --timeout=60s
+        kubectl wait --for=condition=ready pod -l app=tmf629 --timeout=30s
+        kubectl wait --for=condition=ready pod -l app=tmf632 --timeout=30s
       ## Backup ##
         # kubectl apply -f k8s/deployment-postgresql.yaml
         # kubectl port-forward svc/tmf629 8629:8629
