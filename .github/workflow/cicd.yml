@@ -11,7 +11,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       # Checkout the repository
       - name: Checkout code
@@ -29,6 +28,7 @@ jobs:
       # Build Docker images
       - name: Build Docker Image
         run: |
+          docker build . --no-cache -t jom6768/go-oda-tmf629 -f Dockerfile
           docker build . --no-cache -t jom6768/go-oda-tmf632 -f Dockerfile
 
       # Push Docker images
@@ -38,6 +38,7 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+          docker push jom6768/go-oda-tmf629:latest
           docker push jom6768/go-oda-tmf632:latest
 
       # Run any tests
@@ -50,8 +51,32 @@ jobs:
     steps:
     - name: Setup Kubectl
       uses: azure/setup-kubectl@v1
+
     - name: Deploy to Minikube
-      # kubectl apply -f k8s/deployment-postgresql.yaml
       run: |
+        kubectl apply -f k8s/deployment-tmf629.yaml
         kubectl apply -f k8s/deployment-tmf632.yaml
-        kubectl port-forward svc/tmf632 8081:8081
+        kubectl wait --for=condition=available svc/tmf629 --timeout=60s
+        kubectl wait --for=condition=available svc/tmf632 --timeout=60s
+      ## Backup ##
+        # kubectl apply -f k8s/deployment-postgresql.yaml
+        # kubectl port-forward svc/tmf629 8629:8629
+        # kubectl port-forward svc/tmf632 8632:8632
+
+  port-forward:
+    stage: test
+    script:
+      # Start port-forward for tmf629 in the background
+      - nohup kubectl port-forward svc/tmf629 8629:8629 > tmf629.log 2>&1 &
+      - echo $! > tmf629.pid
+
+      # Start port-forward for tmf632 in the background
+      - nohup kubectl port-forward svc/tmf632 8632:8632 > tmf632.log 2>&1 &
+      - echo $! > tmf632.pid
+
+      # Wait a few seconds to ensure port-forwards are ready
+      - sleep 5
+
+      # Cleanup: stop port-forwards
+      #- kill $(cat tmf629.pid)
+      #- kill $(cat tmf632.pid)

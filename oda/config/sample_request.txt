@@ -1,4 +1,4 @@
-curl -X GET http://localhost:8081/tmf-api/partyManagement/v5/individuals
+curl -X GET http://localhost:8081/tmf-api/partyManagement/v5/individual
 
 curl -X GET http://localhost:8081/tmf-api/partyManagement/v5/individual/42
 
@@ -11,7 +11,8 @@ curl -X PATCH http://localhost:8081/tmf-api/partyManagement/v5/individual -d '{"
 
 curl -X DELETE http://localhost:8081/tmf-api/partyManagement/v5/individual/46
 
-curl -X GET http://localhost:8081/tmf-api/partyManagement/v5/organizations
+
+curl -X GET http://localhost:8081/tmf-api/partyManagement/v5/organization
 
 curl -X GET http://localhost:8081/tmf-api/partyManagement/v5/organization/128
 
@@ -21,3 +22,14 @@ curl -X POST http://localhost:8081/tmf-api/partyManagement/v5/organization -d '{
 curl -X PATCH http://localhost:8081/tmf-api/partyManagement/v5/organization -d '{"id": "130","@type": "Organization","isHeadOffice": true,"tradingName": "TeaTwo","status": "validated"}' -H "Content-Type: application/json"
 
 curl -X DELETE http://localhost:8081/tmf-api/partyManagement/v5/organization/129
+
+
+curl -X GET http://localhost:8081/tmf-api/customerManagement/v5/customer
+
+curl -X GET http://localhost:8081/tmf-api/customerManagement/v5/customer/1141
+
+curl -X POST http://localhost:8081/tmf-api/customerManagement/v5/customer -d '{"id": "1141","@type": "Customer","name": "Sun Football Club","role": "Seller","contactMedium": [{"@type": "GeographicAddressContactMedium","contactType": "homeAddress","validFor": {"startDateTime": "2024-01-01T00:00:00Z"},"city": "Nonthaburi","country": "Thailand","postCode": "11120","street1": "Ratchaphruek"}]}' -H "Content-Type: application/json"
+
+curl -X PATCH http://localhost:8081/tmf-api/customerManagement/v5/customer -d '{"id": "1141","@type": "Customer","status": "Approved","statusReason": "Verified"}' -H "Content-Type: application/json"
+
+curl -X DELETE http://localhost:8081/tmf-api/customerManagement/v5/customer/1141

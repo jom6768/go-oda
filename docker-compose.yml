@@ -1,27 +1,18 @@
 services:
-  # db:
-  #   image: postgres:latest
-  #   container_name: go-oda-postgres
-  #   environment:
-  #     POSTGRES_USER: myuser
-  #     POSTGRES_PASSWORD: mypass
-  #     POSTGRES_DB: go_oda
-  #   ports:
-  #     - "5432:5432"
-    # networks:
-    #   - go_oda_network
+  tmf629:
+    build:
+      context: .
+      dockerfile: ./oda/tmf629/Dockerfile
+    container_name: go-oda-tmf629
+    image: jom6768/go-oda-tmf629:latest
+    ports:
+      - "8629:8629"
 
   tmf632:
-    build: .
+    build:
+      context: .
+      dockerfile: ./oda/tmf632/Dockerfile
     container_name: go-oda-tmf632
     image: jom6768/go-oda-tmf632:latest
     ports:
-      - "8081:8081"
-    # networks:
-    #   - go_oda_network
-    # depends_on:
-    #   - db
-
-# networks:
-#   go_oda_network:
-#     driver: bridge
+      - "8632:8632"

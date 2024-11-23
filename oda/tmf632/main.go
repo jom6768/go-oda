@@ -54,6 +54,9 @@ type ExternalReference struct {
 	Type                   string `json:"@type,omitempty"`
 }
 
+// ////////////////////////////////////////////////
+// Database Connection
+// ////////////////////////////////////////////////
 var db *sql.DB
 
 func initDB() {
@@ -75,6 +78,10 @@ func initDB() {
 		time.Sleep(2 * time.Second)
 	}
 }
+
+// ////////////////////////////////////////////////
+// Individual Function
+// ////////////////////////////////////////////////
 
 // listIndividual retrieves a individual
 func listIndividual(c *gin.Context) {
@@ -119,9 +126,8 @@ func getIndividualById(c *gin.Context) {
 	id := c.Param("id")
 	var individual Individual
 	query := `SELECT par.id,par.href,ind.type,par.type AS "baseType",ind.gender,ind.countryOfBirth,ind.nationality,ind.maritalStatus,ind.birthDate,ind.givenName,ind.preferredGivenName,ind.familyName,ind.legalName,ind.middleName,ind.fullName,ind.formattedName,ind.status
-		FROM party par INNER JOIN individual ind ON par.id=ind.party_id WHERE par.id = $1 LIMIT 1`
+		FROM party par INNER JOIN individual ind ON par.id=ind.party_id WHERE par.id = $1 LIMIT 1;`
 	row := db.QueryRow(query, id)
-	log.Println(*row)
 	if err := row.Scan(&individual.ID, &individual.Href, &individual.Type, &individual.BaseType, &individual.Gender, &individual.CountryOfBirth, &individual.Nationality, &individual.MaritalStatus, &individual.BirthDate, &individual.GivenName, &individual.PreferredGivenName, &individual.FamilyName, &individual.LegalName, &individual.MiddleName, &individual.FullName, &individual.FormattedName, &individual.Status); err != nil {
 		if err == sql.ErrNoRows {
 			c.JSON(http.StatusOK, gin.H{"@type": "Individual", "error": "Individual not found"})
@@ -148,7 +154,7 @@ func createIndividual(c *gin.Context) {
 	}
 
 	//Href
-	href := "http://localhost:8081/tmf-api/partyManagement/v5/individual/" + *newIndividual.ID
+	href := "http://localhost:8632/tmf-api/partyManagement/v5/individual/" + *newIndividual.ID
 	//Birthdate
 	birthDate := sql.NullTime{Valid: false}
 	if newIndividual.BirthDate != nil {
@@ -304,7 +310,7 @@ func updateIndividual(c *gin.Context) {
 // deleteIndividualById deletes a individual by ID
 func deleteIndividualById(c *gin.Context) {
 	id := c.Param("id")
-	query := `DELETE FROM externalReference WHERE party_id = $1`
+	query := `DELETE FROM externalReference WHERE party_id = $1;`
 	res, err := db.Exec(query, id)
 	if err == nil {
 		count, err := res.RowsAffected()
@@ -314,7 +320,6 @@ func deleteIndividualById(c *gin.Context) {
 			}
 		}
 	}
-	log.Println("no externalReferences of individual:", id)
 
 	query = `
 		WITH individualdel AS (
@@ -334,6 +339,10 @@ func deleteIndividualById(c *gin.Context) {
 	}
 	c.JSON(http.StatusNoContent, gin.H{"@type": "Individual", "error": "Individual not found"})
 }
+
+// ////////////////////////////////////////////////
+// Organization Function
+// ////////////////////////////////////////////////
 
 // listOrganization retrieves a organization
 func listOrganization(c *gin.Context) {
@@ -378,7 +387,7 @@ func getOrganizationById(c *gin.Context) {
 	id := c.Param("id")
 	var organization Organization
 	query := `SELECT par.id,par.href,org.type,par.type AS "baseType",org.isLegalEntity,org.isHeadOffice,org.organizationType,org.name,org.tradingName,org.nameType,org.status
-		FROM party par INNER JOIN organization org ON par.id=org.party_id WHERE par.id = $1 LIMIT 1`
+		FROM party par INNER JOIN organization org ON par.id=org.party_id WHERE par.id = $1 LIMIT 1;`
 	row := db.QueryRow(query, id)
 	if err := row.Scan(&organization.ID, &organization.Href, &organization.Type, &organization.BaseType, &organization.IsLegalEntity, &organization.IsHeadOffice, &organization.OrganizationType, &organization.Name, &organization.TradingName, &organization.NameType, &organization.Status); err != nil {
 		if err == sql.ErrNoRows {
@@ -406,7 +415,7 @@ func createOrganization(c *gin.Context) {
 	}
 
 	//Href
-	href := "http://localhost:8081/tmf-api/partyManagement/v5/organization/" + *newOrganization.ID
+	href := "http://localhost:8632/tmf-api/partyManagement/v5/organization/" + *newOrganization.ID
 
 	query := `
 		WITH partyins AS (
@@ -463,27 +472,27 @@ func updateOrganization(c *gin.Context) {
 	}
 	if organization.OrganizationType != nil {
 		setClauses = append(setClauses, fmt.Sprintf("organizationType = $%d", counter))
-		params = append(params, organization.OrganizationType)
+		params = append(params, *organization.OrganizationType)
 		counter++
 	}
 	if organization.Name != nil {
 		setClauses = append(setClauses, fmt.Sprintf("name = $%d", counter))
-		params = append(params, organization.Name)
+		params = append(params, *organization.Name)
 		counter++
 	}
 	if organization.TradingName != nil {
 		setClauses = append(setClauses, fmt.Sprintf("tradingName = $%d", counter))
-		params = append(params, organization.TradingName)
+		params = append(params, *organization.TradingName)
 		counter++
 	}
 	if organization.NameType != nil {
 		setClauses = append(setClauses, fmt.Sprintf("nameType = $%d", counter))
-		params = append(params, organization.NameType)
+		params = append(params, *organization.NameType)
 		counter++
 	}
 	if organization.Status != nil {
 		setClauses = append(setClauses, fmt.Sprintf("status = $%d", counter))
-		params = append(params, organization.Status)
+		params = append(params, *organization.Status)
 		counter++
 	}
 
@@ -518,7 +527,7 @@ func updateOrganization(c *gin.Context) {
 // deleteOrganizationById deletes a organization by ID
 func deleteOrganizationById(c *gin.Context) {
 	id := c.Param("id")
-	query := `DELETE FROM externalReference WHERE party_id = $1`
+	query := `DELETE FROM externalReference WHERE party_id = $1;`
 	res, err := db.Exec(query, id)
 	if err == nil {
 		count, err := res.RowsAffected()
@@ -528,7 +537,6 @@ func deleteOrganizationById(c *gin.Context) {
 			}
 		}
 	}
-	log.Println("no externalReferences of organization:", id)
 
 	query = `
 		WITH organizationdel AS (
@@ -549,9 +557,14 @@ func deleteOrganizationById(c *gin.Context) {
 	c.JSON(http.StatusNoContent, gin.H{"@type": "Organization", "error": "Organization not found"})
 }
 
+// ////////////////////////////////////////////////
+// ExternalReference Function
+// ////////////////////////////////////////////////
+
+// getExternalReference retrieves a external reference of individual or organization
 func getExternalReference(input interface{}, party_id string) string {
 	var externalReferences []ExternalReference
-	query := `SELECT name, externalIdentifierType, type FROM externalReference WHERE party_id = $1`
+	query := `SELECT name, externalIdentifierType, type FROM externalReference WHERE party_id = $1;`
 	rows, err := db.Query(query, party_id)
 	if err != nil {
 		return "Failed to retrieve externalReferences"
@@ -603,5 +616,5 @@ func main() {
 	r.POST("/tmf-api/partyManagement/v5/organization", createOrganization)
 	r.PATCH("/tmf-api/partyManagement/v5/organization/:id", updateOrganization)
 	r.DELETE("/tmf-api/partyManagement/v5/organization/:id", deleteOrganizationById)
-	r.Run(":8081")
+	r.Run(":8632")
 }

@@ -17,7 +17,7 @@ spec:
       - name: go-oda-tmf632
         image: jom6768/go-oda-tmf632:latest
         ports:
-        - containerPort: 8081
+        - containerPort: 8632
 
 ---
 
@@ -31,6 +31,6 @@ spec:
   selector:
     app: tmf632  # Match the selector with the app labels in your pods
   ports:
-    - port: 8081        # Port on which the service is exposed within the cluster
-      targetPort: 8081   # Port on which the Go API container is listening
-      nodePort: 30005    # External port on Minikube (in the 30000-32767 range)
+    - port: 8632        # Port on which the service is exposed within the cluster
+      targetPort: 8632   # Port on which the Go API container is listening
+      nodePort: 30032    # External port on Minikube (in the 30000-32767 range)

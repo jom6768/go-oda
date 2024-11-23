@@ -1,0 +1,36 @@
+# TMF629 Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tmf629
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tmf629
+  template:
+    metadata:
+      labels:
+        app: tmf629
+    spec:
+      containers:
+      - name: go-oda-tmf629
+        image: jom6768/go-oda-tmf629:latest
+        ports:
+        - containerPort: 8629
+
+---
+
+# TMF629 Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: tmf629
+spec:
+  type: NodePort
+  selector:
+    app: tmf629  # Match the selector with the app labels in your pods
+  ports:
+    - port: 8629        # Port on which the service is exposed within the cluster
+      targetPort: 8629   # Port on which the Go API container is listening
+      nodePort: 30029    # External port on Minikube (in the 30000-32767 range)

@@ -23,6 +23,6 @@ WORKDIR /app
 # Copy the tmf632 binary from the builder-tmf632 stage
 COPY --from=builder-tmf632 /app/tmf632 ./tmf632
 
-EXPOSE 8081
+EXPOSE 8632
 
 CMD ["./tmf632"]
