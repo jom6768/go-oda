@@ -1,5 +1,6 @@
 # Go, PostgreSQL, Docker, Minikube for TMForum ODA project
 
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/jom6768)
 [![Code Go](https://img.shields.io/badge/Code-Go-007F9F)](https://go.dev)
 [![DB PostgreSQL](https://img.shields.io/badge/DB-PostgreSQL-336791)](https://www.postgresql.org)
 [![Container Docker](https://img.shields.io/badge/Container-Docker-0DB7ED)](https://www.docker.com)
@@ -128,3 +129,15 @@ You can download CTK Test Kit from TMForum website and test.
 You can check Go learning in my youtube channel: [PJ Sweet Home](https://www.youtube.com/@PJSweetHome)
 
 [![Go - A Tour of Go (Completed version with answer of all examples) [English & Thai Subtitle]](https://img.youtube.com/vi/Drrm470ta_Q/0.jpg)](https://www.youtube.com/watch?v=Drrm470ta_Q)
+ 
+
+## Donation
+
+:sparkling_heart::sparkling_heart::sparkling_heart: If this project help you to develop, you can give me a cup of coffee :sparkling_heart::sparkling_heart::sparkling_heart:
+
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://paypal.me/jom6768)
+ 
+
+## License
+
+Copyright (c) 2024 by Methee Suriyakrai. Some rights reserved.
